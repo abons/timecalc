@@ -6,7 +6,15 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab-button active" data-tab="timecalc">⏱️ Timecalc</button>
+    <button class="tab-button" data-tab="githours">📊 Git Hours</button>
+  </div>
+
+  <!-- Timecalc Tab Content -->
+  <div id="timecalc-tab" class="tab-content active">
+    <div class="container">
     <h1>Timecalc</h1>
 
     <label>
@@ -51,7 +59,94 @@
 
     <button id="closeBtn" class="button">Sluiten</button>
   </div>
+  </div>
+
+  <!-- Git Hours Tab Content -->
+  <div id="githours-tab" class="tab-content">
+    <div class="container">
+      <h1>Git Hours - Projectanalyse</h1>
+      
+      <div class="config-section">
+        <label>
+          GitHub Personal Access Token
+          <input type="password" id="githubToken" placeholder="ghp_...">
+          <small>Nodig voor private repos. Maak er een op github.com/settings/tokens</small>
+        </label>
+
+        <label>
+          Repository Owner
+          <input type="text" id="repoOwner" value="edynamics">
+        </label>
+
+        <label>
+          Repository Name
+          <input type="text" id="repoName" value="Yoobi">
+        </label>
+
+        <label>
+          Author Email
+          <input type="email" id="authorEmail" value="axel.bons@yoobi.nl">
+        </label>
+
+        <label>
+          Periode
+          <select id="periodSelect">
+            <!-- Options worden dynamisch gegenereerd -->
+          </select>
+        </label>
+
+        <div id="customPeriod" style="display: none;">
+          <label>
+            Van
+            <input type="date" id="dateFrom">
+          </label>
+          <label>
+            Tot
+            <input type="date" id="dateTo">
+          </label>
+        </div>
+
+        <button id="analyzeBtn" class="button primary">🔍 Analyseer Commits</button>
+      </div>
+
+      <div id="loadingMsg" style="display: none;">
+        <p>⏳ Commits ophalen en analyseren...</p>
+      </div>
+
+      <div id="errorMsg" class="error-msg" style="display: none;"></div>
+
+      <div id="resultsSection" style="display: none;">
+        <h2>Resultaten</h2>
+        
+        <div class="summary-cards">
+          <div class="summary-card">
+            <div class="card-label">OpenAPI</div>
+            <div class="card-value" id="totalOpenapi">0.00</div>
+            <div class="card-unit">uur</div>
+          </div>
+          <div class="summary-card">
+            <div class="card-label">Technical Debt</div>
+            <div class="card-value" id="totalTechDebt">0.00</div>
+            <div class="card-unit">uur</div>
+          </div>
+          <div class="summary-card">
+            <div class="card-label">Support</div>
+            <div class="card-value" id="totalSupport">0.00</div>
+            <div class="card-unit">uur</div>
+          </div>
+          <div class="summary-card">
+            <div class="card-label">Overig</div>
+            <div class="card-value" id="totalOverig">0.00</div>
+            <div class="card-unit">uur</div>
+          </div>
+        </div>
+
+        <div id="dailyBreakdown"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="popup.js"></script>
+  <script type="module" src="git-hours/main.js"></script>
 </body>
 </html>

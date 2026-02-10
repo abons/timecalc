@@ -3,8 +3,48 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Tab Navigation */
+.tabs {
+  display: flex;
+  background: #f0f0f0;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.tab-button.active {
+  background: white;
+  color: #1976d2;
+  border-bottom: 3px solid #1976d2;
+  margin-bottom: -2px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
 .container {
-  min-width: 350px;
+  min-width: 500px;
+  max-width: 700px;
   padding: 12px;
 }
 
@@ -47,4 +87,253 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 input[type="time"]::-webkit-inner-spin-button {
   display: none;
+}
+/* Git Hours Specific Styles */
+.config-section {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.config-section label {
+  margin-bottom: 12px;
+}
+
+.config-section input,
+.config-section select {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 4px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.config-section small {
+  display: block;
+  color: #666;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.button.primary {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.button.primary:hover {
+  background: #1565c0;
+}
+
+.error-msg {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.summary-card:nth-child(1) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.summary-card:nth-child(2) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.summary-card:nth-child(3) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.summary-card:nth-child(4) {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.card-label {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.card-unit {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.day-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.day-total {
+  background: #1976d2;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.day-breakdown {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.breakdown-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.breakdown-item.openapi {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.breakdown-item.techdebt {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.breakdown-item.support {
+  background: #e1f5fe;
+  color: #0277bd;
+}
+
+.breakdown-item.overig {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.commits-list {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.commits-list strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #666;
+}
+
+.commit-item {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 11px;
+  align-items: center;
+}
+
+.commit-time {
+  color: #999;
+  min-width: 40px;
+}
+
+.commit-category {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  font-size: 10px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.commit-category.openapi {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.commit-category.technical_debt {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.commit-category.support {
+  background: #e1f5fe;
+  color: #0277bd;
+}
+
+.commit-category.overig {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.commit-message {
+  flex: 1;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.commit-link {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.commit-link:hover {
+  text-decoration: underline;
+}
+
+.commit-branch {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.day-note {
+  background: #fff3cd;
+  color: #856404;
+  padding: 6px 12px;
+  margin: 8px 0;
+  border-radius: 4px;
+  font-size: 11px;
+  border-left: 3px solid #ffc107;
 }

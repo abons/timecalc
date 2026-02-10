@@ -14,6 +14,9 @@
     "webNavigation",
     "sidePanel"
   ],
+  "host_permissions": [
+    "https://api.github.com/*"
+  ],
   "side_panel": {
     "default_path": "popup.html"
   },
