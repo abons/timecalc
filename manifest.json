@@ -15,7 +15,8 @@
     "sidePanel"
   ],
   "host_permissions": [
-    "https://api.github.com/*"
+    "https://api.github.com/*",
+    "https://*.atlassian.net/*"
   ],
   "side_panel": {
     "default_path": "popup.html"

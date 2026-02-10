@@ -76,3 +76,32 @@ chrome.webNavigation.onCommitted.addListener(details => {
     url: details.url
   });
 });
+// Message handler voor API calls (bypasses CORS)
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'JIRA_API_CALL') {
+    handleJiraApiCall(request)
+      .then(sendResponse)
+      .catch(error => sendResponse({ error: error.message }));
+    return true; // Indicates async response
+  }
+});
+
+async function handleJiraApiCall(request) {
+  const { url, headers } = request;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: headers
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}

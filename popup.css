@@ -337,3 +337,72 @@ input[type="time"]::-webkit-inner-spin-button {
   font-size: 11px;
   border-left: 3px solid #ffc107;
 }
+
+/* Jira Hours Specific Styles */
+.activity-list {
+  margin-top: 12px;
+}
+
+.activity-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  align-items: center;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-time {
+  color: #999;
+  min-width: 45px;
+  font-size: 11px;
+}
+
+.activity-icon {
+  font-size: 14px;
+}
+
+.activity-issue {
+  font-weight: 600;
+  color: #1976d2;
+  min-width: 80px;
+  font-size: 11px;
+}
+
+.activity-text {
+  flex: 1;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-stats {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.day-stats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.day-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.day-date {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}

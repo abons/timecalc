@@ -10,6 +10,7 @@
   <div class="tabs">
     <button class="tab-button active" data-tab="timecalc">⏱️ Timecalc</button>
     <button class="tab-button" data-tab="githours">📊 Git Hours</button>
+    <button class="tab-button" data-tab="jirahours">🎫 Jira Hours</button>
   </div>
 
   <!-- Timecalc Tab Content -->
@@ -146,7 +147,90 @@
     </div>
   </div>
 
+  <!-- Jira Hours Tab Content -->
+  <div id="jirahours-tab" class="tab-content">
+    <div class="container">
+      <h1>Jira Hours - Activity Streams</h1>
+      
+      <div class="config-section">
+        <label>
+          Jira URL
+          <input type="text" id="jiraUrl" placeholder="https://jouw-bedrijf.atlassian.net">
+          <small>Basis URL van je Jira instance</small>
+        </label>
+
+        <label>
+          Email
+          <input type="email" id="jiraEmail" placeholder="jouw@email.nl">
+          <small>Je Jira account email</small>
+        </label>
+
+        <label>
+          API Token
+          <input type="password" id="jiraToken" placeholder="API token">
+          <small>Maak een API token op id.atlassian.com/manage-profile/security/api-tokens</small>
+        </label>
+
+        <label>
+          Periode
+          <select id="jiraPeriodSelect">
+            <!-- Options worden dynamisch gegenereerd -->
+          </select>
+        </label>
+
+        <div id="jiraCustomPeriod" style="display: none;">
+          <label>
+            Van
+            <input type="date" id="jiraDateFrom">
+          </label>
+          <label>
+            Tot
+            <input type="date" id="jiraDateTo">
+          </label>
+        </div>
+
+        <button id="jiraAnalyzeBtn" class="button primary">🔍 Analyseer Activity</button>
+      </div>
+
+      <div id="jiraLoadingMsg" style="display: none;">
+        <p>⏳ Jira activity ophalen en analyseren...</p>
+      </div>
+
+      <div id="jiraErrorMsg" class="error-msg" style="display: none;"></div>
+
+      <div id="jiraResultsSection" style="display: none;">
+        <h2>Resultaten</h2>
+        
+        <div class="summary-cards">
+          <div class="summary-card">
+            <div class="card-label">Totaal Geloogd</div>
+            <div class="card-value" id="jiraTotalLogged">0.00</div>
+            <div class="card-unit">uur</div>
+          </div>
+          <div class="summary-card">
+            <div class="card-label">Issues Bewerkt</div>
+            <div class="card-value" id="jiraTotalIssues">0</div>
+            <div class="card-unit">items</div>
+          </div>
+          <div class="summary-card">
+            <div class="card-label">Comments</div>
+            <div class="card-value" id="jiraTotalComments">0</div>
+            <div class="card-unit">items</div>
+          </div>
+          <div class="summary-card">
+            <div class="card-label">Updates</div>
+            <div class="card-value" id="jiraTotalUpdates">0</div>
+            <div class="card-unit">items</div>
+          </div>
+        </div>
+
+        <div id="jiraDailyBreakdown"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="popup.js"></script>
   <script type="module" src="git-hours/main.js"></script>
+  <script type="module" src="jira-hours/main.js"></script>
 </body>
 </html>
