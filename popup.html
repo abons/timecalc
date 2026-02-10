@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Timecalc</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Timecalc</h1>
+
+    <label>
+      Start
+      <input type="time" id="starttime" class="time-input">
+    </label>
+
+    <label>
+      Eind
+      <input type="time" id="endtime" class="time-input">
+    </label>
+
+    <label>
+      Pauze
+      <input type="time" id="pause" class="time-input">
+    </label>
+
+    <div class="result">
+      Totale werktijd: <span id="totalTime">00:00</span>
+    </div>
+
+    <hr>
+
+    <section id="historySection">
+      <h2>Opgeslagen tijden</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 85px;">Datum</th>
+            <th>Eerste Interactie</th>
+            <th>Laatste Interactie</th>
+            <th style="width: 100px;">Actie</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          </tbody>
+      </table>
+      <p id="noHistoryMessage" style="display:none; text-align: center;">Geen geschiedenis gevonden.</p>
+    </section>
+
+    <hr>
+
+    <button id="closeBtn" class="button">Sluiten</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

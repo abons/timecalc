@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Timecalc",
+  "version": "1.1.3",
+  "description": "Bereken je werktijd en log de eerste interactie per dag.",
+  "action": {
+    "default_title": "Timecalc"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "storage",
+    "webNavigation",
+    "sidePanel"
+  ],
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
