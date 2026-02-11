@@ -68,7 +68,7 @@
   <!-- Git Hours Tab Content -->
   <div id="githours-tab" class="tab-content">
     <div class="container">
-      <h1>Git Hours - Projectanalyse</h1>
+      <h1>Git Commits</h1>
       
       <div class="config-header" id="gitConfigHeader">
         <span>⚙️ Configuratie</span>
@@ -98,12 +98,15 @@
         </label>
       </div>
 
-      <label>
-        Periode
-        <select id="periodSelect">
-          <!-- Options worden dynamisch gegenereerd -->
-        </select>
-      </label>
+      <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+        <label style="flex: 1; margin-bottom: 0;">
+          Periode
+          <select id="periodSelect" style="margin-top: 4px; padding: 8px; height: 36px;">
+            <!-- Options worden dynamisch gegenereerd -->
+          </select>
+        </label>
+        <button id="analyzeBtn" class="button primary" style="margin-top: 0; width: auto; padding: 8px 16px; height: 36px; display: flex; align-items: center; gap: 4px;">🔄 Verversen</button>
+      </div>
 
       <div id="customPeriod" style="display: none;">
         <label>
@@ -115,8 +118,6 @@
           <input type="date" id="dateTo">
         </label>
       </div>
-
-      <button id="analyzeBtn" class="button primary">🔍 Analyseer Commits</button>
 
       <div id="loadingMsg" style="display: none;">
         <p>⏳ Commits ophalen en analyseren...</p>
@@ -163,7 +164,7 @@
   <!-- Jira Hours Tab Content -->
   <div id="jirahours-tab" class="tab-content">
     <div class="container">
-      <h1>Jira Hours - Activity Streams</h1>
+      <h1>Jira - Activity Streams</h1>
       
       <div class="config-header" id="jiraConfigHeader">
         <span>⚙️ Configuratie</span>
@@ -190,12 +191,15 @@
         </label>
       </div>
 
-      <label>
-        Periode
-        <select id="jiraPeriodSelect">
-          <!-- Options worden dynamisch gegenereerd -->
-        </select>
-      </label>
+      <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+        <label style="flex: 1; margin-bottom: 0;">
+          Periode
+          <select id="jiraPeriodSelect" style="margin-top: 4px; padding: 8px; height: 36px;">
+            <!-- Options worden dynamisch gegenereerd -->
+          </select>
+        </label>
+        <button id="jiraAnalyzeBtn" class="button primary" style="margin-top: 0; width: auto; padding: 8px 16px; height: 36px; display: flex; align-items: center; gap: 4px;">🔄 Verversen</button>
+      </div>
 
       <div id="jiraCustomPeriod" style="display: none;">
         <label>
@@ -207,8 +211,6 @@
           <input type="date" id="jiraDateTo">
         </label>
       </div>
-
-      <button id="jiraAnalyzeBtn" class="button primary">🔍 Analyseer Activity</button>
 
       <div id="jiraLoadingMsg" style="display: none;">
         <p>⏳ Jira activity ophalen en analyseren...</p>

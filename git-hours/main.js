@@ -52,9 +52,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     configSection.classList.toggle('collapsed');
   });
 
-  // Custom period toggle
+  // Custom period toggle en auto-analyse
   periodSelect.addEventListener('change', () => {
     customPeriod.style.display = periodSelect.value === 'custom' ? 'block' : 'none';
+    // Automatisch analyseren bij periode wijziging (alleen als niet 'custom' of config compleet is)
+    if (periodSelect.value !== 'custom' && isConfigComplete) {
+      performAnalysis();
+    }
+  });
+
+  // Auto-analyse voor custom period datums
+  [dateFrom, dateTo].forEach(input => {
+    input.addEventListener('change', () => {
+      if (periodSelect.value === 'custom' && dateFrom.value && dateTo.value && isConfigComplete) {
+        performAnalysis();
+      }
+    });
   });
 
   // Sla settings op bij wijziging
