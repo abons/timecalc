@@ -87,8 +87,10 @@ export const ResultsRenderer = {
         minute: '2-digit'
       });
 
-      // Maak issue link
-      const issueLink = baseUrl ? `<a href="${baseUrl}/browse/${activity.issue}" target="_blank" class="issue-link">${activity.issue}</a>` : activity.issue;
+      // Maak issue link met summary als tooltip
+      const issueLink = baseUrl 
+        ? `<a href="${baseUrl}/browse/${activity.issue}" target="_blank" class="issue-link" title="${activity.summary || activity.issue}">${activity.issue}</a>` 
+        : activity.issue;
 
       let icon, text;
       switch (activity.type) {
