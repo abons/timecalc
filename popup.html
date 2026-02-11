@@ -9,8 +9,8 @@
   <!-- Tab Navigation -->
   <div class="tabs">
     <button class="tab-button active" data-tab="timecalc">⏱️ Timecalc</button>
-    <button class="tab-button" data-tab="githours">📊 Git Hours</button>
-    <button class="tab-button" data-tab="jirahours">🎫 Jira Hours</button>
+    <button class="tab-button" data-tab="githours">📊 Git Commits</button>
+    <button class="tab-button" data-tab="jirahours">🎫 Jira Activity</button>
   </div>
 
   <!-- Timecalc Tab Content -->
@@ -120,6 +120,11 @@
 
       <div id="loadingMsg" style="display: none;">
         <p>⏳ Commits ophalen en analyseren...</p>
+      </div>
+
+      <div class="info-note" style="background: #e8f4f8; border-left: 4px solid #0078d4; padding: 12px; margin: 16px 0; border-radius: 4px;">
+        <strong>ℹ️ Over tijdsberekening:</strong>
+        <p style="margin: 8px 0 0 0; font-size: 0.9em; line-height: 1.5;">De geschatte tijd wordt berekend vanaf de eerste interactie (opgeslagen in Timecalc) of vanaf de voorgaande commit.</p>
       </div>
 
       <div id="errorMsg" class="error-msg" style="display: none;"></div>
