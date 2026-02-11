@@ -66,9 +66,9 @@ export const JiraAPI = {
       const sinceTimestamp = new Date(since).getTime();
       const untilTimestamp = new Date(until + 'T23:59:59').getTime();
       
-      // Zoek issues waar de gebruiker actief was (worklogs, comments, of updates)
+      // Zoek issues waar de gebruiker actief was (worklogs, comments, updates, of aangemaakt)
       // Gebruik OR om alle activiteiten te vinden
-      const jql = `(worklogAuthor = "${accountId}" AND worklogDate >= ${since} AND worklogDate <= ${until}) OR (comment ~ "${accountId}" AND updated >= ${since} AND updated <= ${until}) OR (assignee was "${accountId}" AND updated >= ${since} AND updated <= ${until})`;
+      const jql = `(worklogAuthor = "${accountId}" AND worklogDate >= ${since} AND worklogDate <= ${until}) OR (comment ~ "${accountId}" AND updated >= ${since} AND updated <= ${until}) OR (assignee was "${accountId}" AND updated >= ${since} AND updated <= ${until}) OR (creator = "${accountId}" AND created >= ${since} AND created <= ${until})`;
       
       let startAt = 0;
       const maxResults = 50;
@@ -86,6 +86,29 @@ export const JiraAPI = {
           
           // Verwerk de worklogs van elke issue
           for (const issue of data.issues) {
+            // Issue creation
+            if (issue.fields.created) {
+              const createdDate = new Date(issue.fields.created).getTime();
+              if (createdDate >= sinceTimestamp && createdDate <= untilTimestamp) {
+                // Controleer of de creator deze gebruiker is
+                const searchUrl2 = `${baseUrl}/rest/api/3/issue/${issue.key}?fields=creator,description`;
+                try {
+                  const issueDetail = await this.makeApiCall(searchUrl2, headers);
+                  if (issueDetail.fields.creator && issueDetail.fields.creator.accountId === accountId) {
+                    activities.push({
+                      type: 'created',
+                      issue: issue.key,
+                      summary: issue.fields.summary,
+                      timestamp: issue.fields.created,
+                      description: issueDetail.fields.description || ''
+                    });
+                  }
+                } catch (detailError) {
+                  console.warn(`Could not fetch details for ${issue.key}:`, detailError);
+                }
+              }
+            }
+            
             // Worklogs
             if (issue.fields.worklog && issue.fields.worklog.worklogs) {
               const userWorklogs = issue.fields.worklog.worklogs.filter(log => {

@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadingMsg = document.getElementById('jiraLoadingMsg');
   const errorMsg = document.getElementById('jiraErrorMsg');
   const resultsSection = document.getElementById('jiraResultsSection');
+  const configHeader = document.getElementById('jiraConfigHeader');
+  const configSection = document.getElementById('jiraConfigSection');
 
   // Genereer dynamische periode opties
   PeriodSelector.populatePeriodOptions(periodSelect);
@@ -31,6 +33,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   jiraUrl.value = settings.jiraUrl;
   jiraEmail.value = settings.jiraEmail;
   jiraToken.value = settings.jiraToken;
+
+  // Collapse config section als alles is ingevuld
+  const isConfigComplete = settings.jiraUrl && settings.jiraEmail && settings.jiraToken;
+  if (isConfigComplete) {
+    configHeader.classList.add('collapsed');
+    configSection.classList.add('collapsed');
+  }
+
+  // Collapse toggle
+  configHeader.addEventListener('click', () => {
+    configHeader.classList.toggle('collapsed');
+    configSection.classList.toggle('collapsed');
+  });
 
   // Custom period toggle
   periodSelect.addEventListener('change', () => {
@@ -96,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Render resultaten
       ResultsRenderer.renderTotals(results.totals);
-      ResultsRenderer.renderDailyBreakdown(results.daily);
+      ResultsRenderer.renderDailyBreakdown(results.daily, jiraUrl.value);
 
       // Toon resultaten
       loadingMsg.style.display = 'none';

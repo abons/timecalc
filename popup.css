@@ -89,11 +89,48 @@ input[type="time"]::-webkit-inner-spin-button {
   display: none;
 }
 /* Git Hours Specific Styles */
+.config-header {
+  background: #f0f0f0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.config-header:hover {
+  background: #e8e8e8;
+}
+
+.collapse-icon {
+  transition: transform 0.3s;
+  font-size: 12px;
+}
+
+.config-header.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
 .config-section {
   background: #f9f9f9;
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 16px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s, margin-bottom 0.3s;
+}
+
+.config-section.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .config-section label {
@@ -371,6 +408,17 @@ input[type="time"]::-webkit-inner-spin-button {
   color: #1976d2;
   min-width: 80px;
   font-size: 11px;
+}
+
+.activity-issue .issue-link {
+  color: #1976d2;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.activity-issue .issue-link:hover {
+  color: #0d47a1;
+  text-decoration: underline;
 }
 
 .activity-text {

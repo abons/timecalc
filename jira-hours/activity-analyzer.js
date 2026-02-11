@@ -12,6 +12,7 @@ export const ActivityAnalyzer = {
     let totalIssues = new Set();
     let totalComments = 0;
     let totalUpdates = 0;
+    let totalCreated = 0;
 
     for (const activity of activities) {
       const date = activity.timestamp.substring(0, 10); // YYYY-MM-DD
@@ -22,6 +23,7 @@ export const ActivityAnalyzer = {
           issues: new Set(),
           comments: 0,
           updates: 0,
+          created: 0,
           activities: []
         };
       }
@@ -37,6 +39,9 @@ export const ActivityAnalyzer = {
       } else if (activity.type === 'update') {
         dailyStats[date].updates++;
         totalUpdates++;
+      } else if (activity.type === 'created') {
+        dailyStats[date].created++;
+        totalCreated++;
       }
       
       dailyStats[date].issues.add(activity.issue);
@@ -53,6 +58,7 @@ export const ActivityAnalyzer = {
         issues: Array.from(stats.issues),
         comments: stats.comments,
         updates: stats.updates,
+        created: stats.created,
         activities: stats.activities
       };
     }
@@ -63,7 +69,8 @@ export const ActivityAnalyzer = {
         logged: totalLogged,
         issues: totalIssues.size,
         comments: totalComments,
-        updates: totalUpdates
+        updates: totalUpdates,
+        created: totalCreated
       }
     };
   },

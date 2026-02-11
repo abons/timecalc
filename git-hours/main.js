@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadingMsg = document.getElementById('loadingMsg');
   const errorMsg = document.getElementById('errorMsg');
   const resultsSection = document.getElementById('resultsSection');
+  const configHeader = document.getElementById('gitConfigHeader');
+  const configSection = document.getElementById('gitConfigSection');
 
   // Tab switching logica
   initTabSwitching();
@@ -36,6 +38,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   repoOwner.value = settings.repoOwner;
   repoName.value = settings.repoName;
   authorEmail.value = settings.authorEmail;
+
+  // Collapse config section als alles is ingevuld
+  const isConfigComplete = settings.githubToken && settings.repoOwner && settings.repoName && settings.authorEmail;
+  if (isConfigComplete) {
+    configHeader.classList.add('collapsed');
+    configSection.classList.add('collapsed');
+  }
+
+  // Collapse toggle
+  configHeader.addEventListener('click', () => {
+    configHeader.classList.toggle('collapsed');
+    configSection.classList.toggle('collapsed');
+  });
 
   // Custom period toggle
   periodSelect.addEventListener('change', () => {

@@ -11,12 +11,18 @@ export const ResultsRenderer = {
     document.getElementById('jiraTotalIssues').textContent = totals.issues;
     document.getElementById('jiraTotalComments').textContent = totals.comments;
     document.getElementById('jiraTotalUpdates').textContent = totals.updates;
+    
+    // Voeg created toe als het bestaat
+    const createdElement = document.getElementById('jiraTotalCreated');
+    if (createdElement && totals.created !== undefined) {
+      createdElement.textContent = totals.created;
+    }
   },
 
   /**
    * Render dagelijkse breakdown
    */
-  renderDailyBreakdown(dailyData) {
+  renderDailyBreakdown(dailyData, jiraUrl) {
     const container = document.getElementById('jiraDailyBreakdown');
     container.innerHTML = '';
 
@@ -42,15 +48,16 @@ export const ResultsRenderer = {
             <div class="day-name">${dayName}</div>
             <div class="day-date">${dateFormatted}</div>
           </div>
-          <div class="day-total">${data.logged.toFixed(2)}h geloogd</div>
+          <div class="day-total">${data.logged.toFixed(2)}h gelogd</div>
         </div>
         <div class="day-stats">
           <span>📋 ${data.issuesCount} issues</span>
           <span>💬 ${data.comments} comments</span>
           <span>✏️ ${data.updates} updates</span>
+          ${data.created ? `<span>✨ ${data.created} aangemaakt</span>` : ''}
         </div>
         <div class="activity-list">
-          ${this.renderActivities(data.activities)}
+          ${this.renderActivities(data.activities, jiraUrl)}
         </div>
       `;
 
@@ -61,7 +68,7 @@ export const ResultsRenderer = {
   /**
    * Render individual activities
    */
-  renderActivities(activities) {
+  renderActivities(activities, jiraUrl) {
     if (activities.length === 0) {
       return '<div class="activity-item">Geen details beschikbaar</div>';
     }
@@ -71,18 +78,24 @@ export const ResultsRenderer = {
       new Date(b.timestamp) - new Date(a.timestamp)
     );
 
+    // Verwijder trailing slash van jiraUrl
+    const baseUrl = jiraUrl ? jiraUrl.replace(/\/$/, '') : '';
+
     return sorted.map(activity => {
       const time = new Date(activity.timestamp).toLocaleTimeString('nl-NL', {
         hour: '2-digit',
         minute: '2-digit'
       });
 
+      // Maak issue link
+      const issueLink = baseUrl ? `<a href="${baseUrl}/browse/${activity.issue}" target="_blank" class="issue-link">${activity.issue}</a>` : activity.issue;
+
       let icon, text;
       switch (activity.type) {
         case 'worklog':
           icon = '⏱️';
           const hours = (activity.timeSpent / 3600).toFixed(2);
-          text = `${hours}h geloogd${activity.comment ? `: ${activity.comment}` : ''}`;
+          text = `${hours}h gelogd${activity.comment ? `: ${activity.comment}` : ''}`;
           break;
         case 'comment':
           icon = '💬';
@@ -91,6 +104,21 @@ export const ResultsRenderer = {
         case 'update':
           icon = '✏️';
           text = activity.changes.join(', ');
+          break;
+        case 'created':
+          icon = '✨';
+          let descriptionText = '';
+          if (activity.description) {
+            if (typeof activity.description === 'string') {
+              descriptionText = activity.description.substring(0, 100);
+            } else if (activity.description.content) {
+              // Atlassian Document Format - extract text from content
+              descriptionText = this.extractTextFromADF(activity.description).substring(0, 100);
+            }
+            text = `Issue aangemaakt${descriptionText ? ` - ${descriptionText}...` : ''}`;
+          } else {
+            text = 'Issue aangemaakt';
+          }
           break;
         default:
           icon = '📝';
@@ -101,10 +129,32 @@ export const ResultsRenderer = {
         <div class="activity-item">
           <span class="activity-time">${time}</span>
           <span class="activity-icon">${icon}</span>
-          <span class="activity-issue">${activity.issue}</span>
+          <span class="activity-issue">${issueLink}</span>
           <span class="activity-text">${text}</span>
         </div>
       `;
     }).join('');
+  },
+
+  /**
+   * Extract plain text from Atlassian Document Format (ADF)
+   */
+  extractTextFromADF(adf) {
+    if (!adf || !adf.content) {
+      return '';
+    }
+
+    let text = '';
+    const extractFromNode = (node) => {
+      if (node.type === 'text') {
+        text += node.text || '';
+      }
+      if (node.content && Array.isArray(node.content)) {
+        node.content.forEach(extractFromNode);
+      }
+    };
+
+    adf.content.forEach(extractFromNode);
+    return text.trim();
   }
 };

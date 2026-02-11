@@ -67,7 +67,12 @@
     <div class="container">
       <h1>Git Hours - Projectanalyse</h1>
       
-      <div class="config-section">
+      <div class="config-header" id="gitConfigHeader">
+        <span>⚙️ Configuratie</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      
+      <div class="config-section" id="gitConfigSection">
         <label>
           GitHub Personal Access Token
           <input type="password" id="githubToken" placeholder="ghp_...">
@@ -88,27 +93,27 @@
           Author Email
           <input type="email" id="authorEmail" value="axel.bons@yoobi.nl">
         </label>
-
-        <label>
-          Periode
-          <select id="periodSelect">
-            <!-- Options worden dynamisch gegenereerd -->
-          </select>
-        </label>
-
-        <div id="customPeriod" style="display: none;">
-          <label>
-            Van
-            <input type="date" id="dateFrom">
-          </label>
-          <label>
-            Tot
-            <input type="date" id="dateTo">
-          </label>
-        </div>
-
-        <button id="analyzeBtn" class="button primary">🔍 Analyseer Commits</button>
       </div>
+
+      <label>
+        Periode
+        <select id="periodSelect">
+          <!-- Options worden dynamisch gegenereerd -->
+        </select>
+      </label>
+
+      <div id="customPeriod" style="display: none;">
+        <label>
+          Van
+          <input type="date" id="dateFrom">
+        </label>
+        <label>
+          Tot
+          <input type="date" id="dateTo">
+        </label>
+      </div>
+
+      <button id="analyzeBtn" class="button primary">🔍 Analyseer Commits</button>
 
       <div id="loadingMsg" style="display: none;">
         <p>⏳ Commits ophalen en analyseren...</p>
@@ -152,7 +157,12 @@
     <div class="container">
       <h1>Jira Hours - Activity Streams</h1>
       
-      <div class="config-section">
+      <div class="config-header" id="jiraConfigHeader">
+        <span>⚙️ Configuratie</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      
+      <div class="config-section" id="jiraConfigSection">
         <label>
           Jira URL
           <input type="text" id="jiraUrl" placeholder="https://jouw-bedrijf.atlassian.net">
@@ -170,27 +180,27 @@
           <input type="password" id="jiraToken" placeholder="API token">
           <small>Maak een API token op id.atlassian.com/manage-profile/security/api-tokens</small>
         </label>
-
-        <label>
-          Periode
-          <select id="jiraPeriodSelect">
-            <!-- Options worden dynamisch gegenereerd -->
-          </select>
-        </label>
-
-        <div id="jiraCustomPeriod" style="display: none;">
-          <label>
-            Van
-            <input type="date" id="jiraDateFrom">
-          </label>
-          <label>
-            Tot
-            <input type="date" id="jiraDateTo">
-          </label>
-        </div>
-
-        <button id="jiraAnalyzeBtn" class="button primary">🔍 Analyseer Activity</button>
       </div>
+
+      <label>
+        Periode
+        <select id="jiraPeriodSelect">
+          <!-- Options worden dynamisch gegenereerd -->
+        </select>
+      </label>
+
+      <div id="jiraCustomPeriod" style="display: none;">
+        <label>
+          Van
+          <input type="date" id="jiraDateFrom">
+        </label>
+        <label>
+          Tot
+          <input type="date" id="jiraDateTo">
+        </label>
+      </div>
+
+      <button id="jiraAnalyzeBtn" class="button primary">🔍 Analyseer Activity</button>
 
       <div id="jiraLoadingMsg" style="display: none;">
         <p>⏳ Jira activity ophalen en analyseren...</p>
@@ -203,7 +213,7 @@
         
         <div class="summary-cards">
           <div class="summary-card">
-            <div class="card-label">Totaal Geloogd</div>
+            <div class="card-label">Totaal Gelogd</div>
             <div class="card-value" id="jiraTotalLogged">0.00</div>
             <div class="card-unit">uur</div>
           </div>
