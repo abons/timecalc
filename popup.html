@@ -16,49 +16,52 @@
   <!-- Timecalc Tab Content -->
   <div id="timecalc-tab" class="tab-content active">
     <div class="container">
-    <h1>Timecalc</h1>
+    <h1>⏱️ Timecalc - Werktijd Calculator</h1>
 
-    <label>
-      Start
-      <input type="time" id="starttime" class="time-input">
-    </label>
+    <div class="timecalc-input-section">
+      <div class="timecalc-input-row">
+        <label>
+          ⏰ Start
+          <input type="time" id="starttime" class="time-input">
+        </label>
 
-    <label>
-      Eind
-      <input type="time" id="endtime" class="time-input">
-    </label>
+        <label>
+          🏁 Eind
+          <input type="time" id="endtime" class="time-input">
+        </label>
 
-    <label>
-      Pauze
-      <input type="time" id="pause" class="time-input">
-    </label>
+        <label>
+          ☕ Pauze
+          <input type="time" id="pause" class="time-input">
+        </label>
+      </div>
 
-    <div class="result">
-      Totale werktijd: <span id="totalTime">00:00</span>
+      <div class="timecalc-result-card">
+        <div class="result-label">Totale werktijd</div>
+        <div class="result-value" id="totalTime">00:00</div>
+      </div>
     </div>
 
-    <hr>
-
-    <section id="historySection">
-      <h2>Opgeslagen tijden</h2>
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 85px;">Datum</th>
-            <th>Eerste Interactie</th>
-            <th>Laatste Interactie</th>
-            <th style="width: 100px;">Actie</th>
-          </tr>
-        </thead>
-        <tbody id="historyTableBody">
-          </tbody>
-      </table>
-      <p id="noHistoryMessage" style="display:none; text-align: center;">Geen geschiedenis gevonden.</p>
+    <section id="historySection" class="history-section">
+      <h2>📅 Opgeslagen tijden</h2>
+      <div class="table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th style="width: 85px;">Datum</th>
+              <th>Eerste Interactie</th>
+              <th>Laatste Interactie</th>
+              <th style="width: 100px;">Actie</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            </tbody>
+        </table>
+        <p id="noHistoryMessage" style="display:none; text-align: center; color: #999; padding: 20px;">Geen geschiedenis gevonden.</p>
+      </div>
     </section>
 
-    <hr>
-
-    <button id="closeBtn" class="button">Sluiten</button>
+    <button id="closeBtn" class="button primary">Sluiten</button>
   </div>
   </div>
 

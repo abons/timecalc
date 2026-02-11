@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
           deleteButton.className = 'button';
           deleteButton.style.fontSize = '0.8em';
           deleteButton.style.padding = '5px 10px';
+          deleteButton.style.margin = '0';
           deleteButton.addEventListener('click', (e) => {
             e.stopPropagation(); // Voorkom dat de rij-klik-event ook afgaat
             deleteRecordsUntilDate(record.date);
