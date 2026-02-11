@@ -44,17 +44,6 @@ export const PeriodSelector = {
     
     const now = new Date();
     
-    // Deze maand
-    const currentMonth = now.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
-    const currentMonthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    selectElement.add(new Option(`📅 ${currentMonth}`, `month:${currentMonthValue}`));
-    
-    // Vorige maand
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthName = lastMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
-    const lastMonthValue = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
-    selectElement.add(new Option(`📅 ${lastMonthName}`, `month:${lastMonthValue}`));
-    
     // Deze week
     const thisWeekStart = this.getMonday(now);
     const thisWeekEnd = new Date(thisWeekStart);
@@ -82,6 +71,17 @@ export const PeriodSelector = {
     const twoWeeksAgoNum = this.getWeekNumber(twoWeeksAgoDate);
     const twoWeeksAgoLabel = `📆 Week ${twoWeeksAgoNum} (${twoWeeksAgoStart.getDate()} ${twoWeeksAgoStart.toLocaleDateString('nl-NL', {month: 'short'})} - ${twoWeeksAgoEnd.getDate()} ${twoWeeksAgoEnd.toLocaleDateString('nl-NL', {month: 'short'})})`;
     selectElement.add(new Option(twoWeeksAgoLabel, `week:${this.formatDate(twoWeeksAgoStart)}`));
+    
+    // Deze maand
+    const currentMonth = now.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+    const currentMonthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    selectElement.add(new Option(`📅 ${currentMonth}`, `month:${currentMonthValue}`));
+    
+    // Vorige maand
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthName = lastMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+    const lastMonthValue = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+    selectElement.add(new Option(`📅 ${lastMonthName}`, `month:${lastMonthValue}`));
     
     // Custom optie
     selectElement.add(new Option('🔧 Custom...', 'custom'));

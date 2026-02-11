@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Main analyse functie
-  analyzeBtn.addEventListener('click', async () => {
+  const performAnalysis = async () => {
     try {
       // Reset UI
       errorMsg.style.display = 'none';
@@ -122,7 +122,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       errorMsg.textContent = `❌ Fout: ${error.message}`;
       errorMsg.style.display = 'block';
     }
-  });
+  };
+
+  // Button click handler
+  analyzeBtn.addEventListener('click', performAnalysis);
+
+  // Auto-load data als config compleet is
+  if (isConfigComplete) {
+    performAnalysis();
+  }
 });
 
 /**

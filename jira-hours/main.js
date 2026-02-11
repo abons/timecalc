@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Analyse button handler
-  analyzeBtn.addEventListener('click', async () => {
+  // Main analyse functie
+  const performAnalysis = async () => {
     // Reset UI
     loadingMsg.style.display = 'block';
     errorMsg.style.display = 'none';
@@ -122,5 +122,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       errorMsg.textContent = `Error: ${error.message}`;
       errorMsg.style.display = 'block';
     }
-  });
+  };
+
+  // Button click handler
+  analyzeBtn.addEventListener('click', performAnalysis);
+
+  // Auto-load data als config compleet is
+  if (isConfigComplete) {
+    performAnalysis();
+  }
 });
