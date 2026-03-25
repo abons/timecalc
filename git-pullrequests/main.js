@@ -97,13 +97,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Filter reviewer-PRs: sla over als de gebruiker al een CHANGES_REQUESTED review heeft gedaan
       // (bal ligt dan bij de assignee, geen actie nodig van de reviewer)
+      // Uitzondering: als de auteur daarna opnieuw een review aanvraagt, is actie wél nodig
       const reviewerPRsForAction = [];
       for (const pr of reviewerRaw) {
-        const reviews = await PullRequestAPI.fetchPRReviews(owner, repo, pr.number, token);
+        const [reviews, requestedReviewers] = await Promise.all([
+          PullRequestAPI.fetchPRReviews(owner, repo, pr.number, token),
+          PullRequestAPI.fetchRequestedReviewers(owner, repo, pr.number, token)
+        ]);
+        const iReRequested = requestedReviewers.some(l => l.toLowerCase() === username.toLowerCase());
         const myLatestReview = reviews
           .filter(r => r.user.login.toLowerCase() === username.toLowerCase())
           .at(-1);
-        if (myLatestReview?.state === 'CHANGES_REQUESTED') {
+        if (myLatestReview?.state === 'CHANGES_REQUESTED' && !iReRequested) {
           pr._status = 'changes-requested-by-me';
         } else {
           pr._status = 'review-required';
@@ -118,14 +123,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Bepaal status + actie voor alle assignee-PRs
       const assigneePRsForAction = [];
       for (const pr of allAssigneePRs) {
-        const reviews = await PullRequestAPI.fetchPRReviews(owner, repo, pr.number, token);
+        const [reviews, requestedReviewers] = await Promise.all([
+          PullRequestAPI.fetchPRReviews(owner, repo, pr.number, token),
+          PullRequestAPI.fetchRequestedReviewers(owner, repo, pr.number, token)
+        ]);
+
         const latestByReviewer = {};
         reviews.forEach(r => { latestByReviewer[r.user.login] = r.state; });
-        const states = Object.values(latestByReviewer);
 
-        if (states.includes('CHANGES_REQUESTED')) {
+        // Als een reviewer opnieuw in requestedReviewers staat, is hun oude review
+        // niet meer van toepassing (nieuwe review-aanvraag na pushes)
+        const activeLatestByReviewer = Object.fromEntries(
+          Object.entries(latestByReviewer).filter(([login]) => !requestedReviewers.includes(login))
+        );
+        const activeStates = Object.values(activeLatestByReviewer);
+
+        // Bouw een volledig beeld van alle reviewers en hun status
+        const reviewerStatus = [
+          ...requestedReviewers.map(login => ({ login, state: 'PENDING' })),
+          ...Object.entries(activeLatestByReviewer).map(([login, state]) => ({ login, state }))
+        ];
+        pr._reviewerStatus = reviewerStatus;
+
+        if (activeStates.includes('CHANGES_REQUESTED')) {
           pr._status = 'changes-requested';
-        } else if (states.length > 0 && states.every(s => s === 'APPROVED')) {
+        } else if (requestedReviewers.length === 0 && activeStates.length > 0 && activeStates.every(s => s === 'APPROVED')) {
           pr._status = 'approved';
         } else {
           pr._status = 'pending';

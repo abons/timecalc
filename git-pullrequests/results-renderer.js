@@ -25,7 +25,8 @@ export const PRResultsRenderer = {
     container.appendChild(this._renderCollapsibleSection(
       `Mijn PRs als assignee`,
       allAssigneePRs,
-      pr => this._statusBadge(pr._status, 'assignee')
+      pr => this._statusBadge(pr._status, 'assignee'),
+      pr => pr._reviewerStatus
     ));
 
     container.appendChild(this._renderCollapsibleSection(
@@ -49,7 +50,7 @@ export const PRResultsRenderer = {
     return section;
   },
 
-  _renderCollapsibleSection(title, prs, badgeFn) {
+  _renderCollapsibleSection(title, prs, badgeFn, extraFn) {
     const section = document.createElement('div');
     section.className = 'pr-section pr-collapsible';
 
@@ -76,7 +77,7 @@ export const PRResultsRenderer = {
       empty.textContent = 'Geen openstaande pull requests.';
       body.appendChild(empty);
     } else {
-      prs.forEach(pr => body.appendChild(this._renderPRCard(pr, badgeFn)));
+      prs.forEach(pr => body.appendChild(this._renderPRCard(pr, badgeFn, extraFn)));
     }
 
     section.appendChild(body);
@@ -89,7 +90,7 @@ export const PRResultsRenderer = {
     return section;
   },
 
-  _renderPRCard(pr, badgeFn) {
+  _renderPRCard(pr, badgeFn, extraFn) {
     const card = document.createElement('div');
     card.className = 'pr-card';
     card.addEventListener('click', () => {
@@ -118,6 +119,38 @@ export const PRResultsRenderer = {
     meta.appendChild(badge);
 
     card.appendChild(meta);
+
+    if (extraFn) {
+      const reviewerStatus = extraFn(pr);
+      if (reviewerStatus && reviewerStatus.length > 0) {
+        const reviewerList = document.createElement('div');
+        reviewerList.className = 'pr-reviewer-list';
+        reviewerStatus.forEach(({ login, state }) => {
+          const item = document.createElement('span');
+          item.className = 'pr-reviewer-item';
+          let icon, cls;
+          if (state === 'PENDING') {
+            icon = '⏳'; cls = 'pending';
+          } else if (state === 'APPROVED') {
+            icon = '✅'; cls = 'approved';
+          } else if (state === 'CHANGES_REQUESTED') {
+            icon = '🔁'; cls = 'changes';
+          } else {
+            icon = '💬'; cls = 'commented';
+          }
+          item.className = `pr-reviewer-item ${cls}`;
+          item.textContent = `${icon} ${login}`;
+          reviewerList.appendChild(item);
+        });
+        card.appendChild(reviewerList);
+      } else {
+        const noReviewer = document.createElement('div');
+        noReviewer.className = 'pr-waiting';
+        noReviewer.textContent = 'Geen reviewers toegewezen';
+        card.appendChild(noReviewer);
+      }
+    }
+
     return card;
   },
 

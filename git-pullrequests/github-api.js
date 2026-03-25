@@ -40,5 +40,13 @@ export const PullRequestAPI = {
     const response = await fetch(url, { headers: this._headers(token) });
     if (!response.ok) return [];
     return response.json();
+  },
+
+  async fetchRequestedReviewers(owner, repo, prNumber, token) {
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/requested_reviewers`;
+    const response = await fetch(url, { headers: this._headers(token) });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return (data.users || []).map(u => u.login);
   }
 };
