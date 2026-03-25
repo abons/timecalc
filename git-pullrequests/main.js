@@ -90,8 +90,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Haal reviewer-PRs en assignee-PRs parallel op
-      const [reviewerRaw, allAssigneePRs] = await Promise.all([
+      const [reviewerRaw, reviewedOpenRaw, allAssigneePRs] = await Promise.all([
         PullRequestAPI.fetchReviewRequestedPRs(owner, repo, username, token),
+        PullRequestAPI.fetchReviewedOpenPRs(owner, repo, username, token),
         PullRequestAPI.fetchAssigneePRs(owner, repo, username, token)
       ]);
 
@@ -119,6 +120,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Sluit PRs uit waarbij gebruiker ook reviewer is (voorkom dubbeling in actielijst)
       const reviewerPRNumbers = new Set(reviewerPRsForAction.map(pr => pr.number));
+
+      // Voeg PRs toe waar ik al een review voor gedaan heb maar niet meer in review-requested sta
+      // (bijv. na een changes-requested review). Die krijgen _status 'changes-requested-by-me'.
+      const reviewerRawNumbers = new Set(reviewerRaw.map(pr => pr.number));
+      const reviewedOnlyPRs = reviewedOpenRaw.filter(pr => !reviewerRawNumbers.has(pr.number));
+      for (const pr of reviewedOnlyPRs) {
+        const reviews = await PullRequestAPI.fetchPRReviews(owner, repo, pr.number, token);
+        const myLatestReview = reviews
+          .filter(r => r.user.login.toLowerCase() === username.toLowerCase())
+          .at(-1);
+        pr._status = myLatestReview?.state === 'CHANGES_REQUESTED'
+          ? 'changes-requested-by-me'
+          : 'review-required';
+      }
+
+      // Volledig overzicht = review-requested + reviewed (dedup)
+      const allReviewerPRs = [...reviewerRaw, ...reviewedOnlyPRs];
 
       // Bepaal status + actie voor alle assignee-PRs
       const assigneePRsForAction = [];
@@ -167,7 +185,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       loadingMsg.style.display = 'none';
       resultsContainer.style.display = 'block';
-      PRResultsRenderer.render(reviewerPRsForAction, assigneePRsForAction, reviewerRaw, allAssigneePRs, resultsContainer);
+
+      // Gesloten PRs (afgelopen maand, auteur = ik)
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const [closedPRs, reviewedMergedPRs] = await Promise.all([
+        PullRequestAPI.fetchClosedAuthorPRs(owner, repo, username, token, oneMonthAgo),
+        PullRequestAPI.fetchReviewedMergedPRs(owner, repo, username, token, oneWeekAgo)
+      ]);
+
+      // Groepeer per dag (closed_at)
+      const closedByDay = {};
+      closedPRs.forEach(pr => {
+        const day = pr.closed_at ? pr.closed_at.split('T')[0] : 'onbekend';
+        if (!closedByDay[day]) closedByDay[day] = [];
+        closedByDay[day].push(pr);
+      });
+      const closedDays = Object.keys(closedByDay).sort((a, b) => b.localeCompare(a));
+
+      const reviewedMergedByDay = {};
+      reviewedMergedPRs
+        .filter(pr => pr.user.login.toLowerCase() !== username.toLowerCase())
+        .forEach(pr => {
+        const day = pr.closed_at ? pr.closed_at.split('T')[0] : 'onbekend';
+        if (!reviewedMergedByDay[day]) reviewedMergedByDay[day] = [];
+        reviewedMergedByDay[day].push(pr);
+      });
+      const reviewedMergedDays = Object.keys(reviewedMergedByDay).sort((a, b) => b.localeCompare(a));
+
+      PRResultsRenderer.render(reviewerPRsForAction, assigneePRsForAction, allReviewerPRs, allAssigneePRs, closedByDay, closedDays, reviewedMergedByDay, reviewedMergedDays, resultsContainer);
 
     } catch (error) {
       console.error('PR fout:', error);

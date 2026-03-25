@@ -3,7 +3,7 @@
  */
 
 export const PRResultsRenderer = {
-  render(reviewerPRsForAction, assigneePRsForAction, allReviewerPRs, allAssigneePRs, container) {
+  render(reviewerPRsForAction, assigneePRsForAction, allReviewerPRs, allAssigneePRs, closedByDay, closedDays, reviewedMergedByDay, reviewedMergedDays, container) {
     container.innerHTML = '';
 
     // --- Actielijst ---
@@ -34,6 +34,12 @@ export const PRResultsRenderer = {
       allReviewerPRs,
       pr => this._statusBadge(pr._status, 'reviewer')
     ));
+
+    // --- Gesloten PRs per dag ---
+    container.appendChild(this._renderClosedPRsSection(closedByDay, closedDays));
+
+    // --- Door mij gereviewde en gemerge PRs (afgelopen week) ---
+    container.appendChild(this._renderReviewedMergedSection(reviewedMergedByDay, reviewedMergedDays));
   },
 
   _renderSection(title, prs) {
@@ -115,6 +121,11 @@ export const PRResultsRenderer = {
     author.textContent = `door ${pr.user.login}`;
     meta.appendChild(author);
 
+    const age = document.createElement('span');
+    age.className = 'pr-age';
+    age.textContent = this._formatAge(pr.created_at, pr.closed_at);
+    meta.appendChild(age);
+
     const badge = badgeFn ? badgeFn(pr) : this._actionBadge(pr);
     meta.appendChild(badge);
 
@@ -192,5 +203,184 @@ export const PRResultsRenderer = {
       }
     }
     return badge;
+  },
+
+  _renderClosedPRsSection(closedByDay, closedDays) {
+    const totalCount = closedDays.reduce((sum, d) => sum + closedByDay[d].length, 0);
+
+    const section = document.createElement('div');
+    section.className = 'pr-section pr-collapsible';
+
+    const header = document.createElement('div');
+    header.className = 'pr-collapsible-header';
+
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = `Mijn gesloten PRs afgelopen maand (${totalCount})`;
+    header.appendChild(titleSpan);
+
+    const icon = document.createElement('span');
+    icon.className = 'pr-collapse-icon';
+    icon.textContent = '▶';
+    header.appendChild(icon);
+
+    section.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'pr-collapsible-body collapsed';
+
+    if (closedDays.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'pr-empty';
+      empty.textContent = 'Geen gesloten pull requests afgelopen maand.';
+      body.appendChild(empty);
+    } else {
+      closedDays.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'pr-day-header';
+        dayHeader.textContent = this._formatDay(day);
+        body.appendChild(dayHeader);
+
+        closedByDay[day].forEach(pr => {
+          const card = document.createElement('div');
+          card.className = 'pr-card pr-card-closed';
+          card.addEventListener('click', () => chrome.tabs.create({ url: pr.html_url }));
+
+          const titleEl = document.createElement('div');
+          titleEl.className = 'pr-title';
+          titleEl.textContent = pr.title;
+          card.appendChild(titleEl);
+
+          const meta = document.createElement('div');
+          meta.className = 'pr-meta';
+
+          const prNumber = document.createElement('span');
+          prNumber.className = 'pr-number';
+          prNumber.textContent = `#${pr.number}`;
+          meta.appendChild(prNumber);
+
+          const age = document.createElement('span');
+          age.className = 'pr-age';
+          age.textContent = this._formatAge(pr.created_at, pr.closed_at);
+          meta.appendChild(age);
+
+          const stateBadge = document.createElement('span');
+          stateBadge.className = `pr-badge ${pr.pull_request?.merged_at ? 'approved' : 'closed'}`;
+          stateBadge.textContent = pr.pull_request?.merged_at ? 'Gemerged' : 'Gesloten';
+          meta.appendChild(stateBadge);
+
+          card.appendChild(meta);
+          body.appendChild(card);
+        });
+      });
+    }
+
+    section.appendChild(body);
+
+    header.addEventListener('click', () => {
+      const collapsed = body.classList.toggle('collapsed');
+      icon.textContent = collapsed ? '▶' : '▼';
+    });
+
+    return section;
+  },
+
+  _formatAge(createdAt, closedAt) {
+    const start = new Date(createdAt);
+    const end = closedAt ? new Date(closedAt) : new Date();
+    const diffMs = end - start;
+    const diffH = Math.floor(diffMs / 3600000);
+    const diffD = Math.floor(diffH / 24);
+    if (diffD >= 1) return `${diffD}d`;
+    return `${diffH}u`;
+  },
+
+  _formatDay(dateStr) {
+    if (dateStr === 'onbekend') return 'Onbekend';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+  },
+
+  _renderReviewedMergedSection(byDay, days) {
+    const totalCount = days.reduce((sum, d) => sum + byDay[d].length, 0);
+
+    const section = document.createElement('div');
+    section.className = 'pr-section pr-collapsible';
+
+    const header = document.createElement('div');
+    header.className = 'pr-collapsible-header';
+
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = `Door mij gereviewde en gemerge PRs afgelopen week (${totalCount})`;
+    header.appendChild(titleSpan);
+
+    const icon = document.createElement('span');
+    icon.className = 'pr-collapse-icon';
+    icon.textContent = '▶';
+    header.appendChild(icon);
+
+    section.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'pr-collapsible-body collapsed';
+
+    if (days.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'pr-empty';
+      empty.textContent = 'Geen gereviewde en gemerge pull requests afgelopen week.';
+      body.appendChild(empty);
+    } else {
+      days.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'pr-day-header';
+        dayHeader.textContent = this._formatDay(day);
+        body.appendChild(dayHeader);
+
+        byDay[day].forEach(pr => {
+          const card = document.createElement('div');
+          card.className = 'pr-card pr-card-closed';
+          card.addEventListener('click', () => chrome.tabs.create({ url: pr.html_url }));
+
+          const titleEl = document.createElement('div');
+          titleEl.className = 'pr-title';
+          titleEl.textContent = pr.title;
+          card.appendChild(titleEl);
+
+          const meta = document.createElement('div');
+          meta.className = 'pr-meta';
+
+          const prNumber = document.createElement('span');
+          prNumber.className = 'pr-number';
+          prNumber.textContent = `#${pr.number}`;
+          meta.appendChild(prNumber);
+
+          const author = document.createElement('span');
+          author.className = 'pr-author';
+          author.textContent = `door ${pr.user.login}`;
+          meta.appendChild(author);
+
+          const age = document.createElement('span');
+          age.className = 'pr-age';
+          age.textContent = this._formatAge(pr.created_at, pr.closed_at);
+          meta.appendChild(age);
+
+          const badge = document.createElement('span');
+          badge.className = 'pr-badge approved';
+          badge.textContent = 'Gemerged';
+          meta.appendChild(badge);
+
+          card.appendChild(meta);
+          body.appendChild(card);
+        });
+      });
+    }
+
+    section.appendChild(body);
+
+    header.addEventListener('click', () => {
+      const collapsed = body.classList.toggle('collapsed');
+      icon.textContent = collapsed ? '▶' : '▼';
+    });
+
+    return section;
   }
 };

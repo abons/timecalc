@@ -26,6 +26,15 @@ export const PullRequestAPI = {
     return data.items || [];
   },
 
+  async fetchReviewedOpenPRs(owner, repo, username, token) {
+    const q = `is:pr+is:open+reviewed-by:${username}+repo:${owner}/${repo}`;
+    const url = `https://api.github.com/search/issues?q=${q}&per_page=50`;
+    const response = await fetch(url, { headers: this._headers(token) });
+    if (!response.ok) throw new Error(`GitHub API fout: ${response.status} ${response.statusText}`);
+    const data = await response.json();
+    return data.items || [];
+  },
+
   async fetchAssigneePRs(owner, repo, username, token) {
     const q = `is:pr+is:open+assignee:${username}+repo:${owner}/${repo}`;
     const url = `https://api.github.com/search/issues?q=${q}&per_page=50`;
@@ -48,5 +57,25 @@ export const PullRequestAPI = {
     if (!response.ok) return [];
     const data = await response.json();
     return (data.users || []).map(u => u.login);
+  },
+
+  async fetchClosedAuthorPRs(owner, repo, username, token, since) {
+    const sinceDate = since.toISOString().split('T')[0];
+    const q = `is:pr+is:closed+author:${username}+repo:${owner}/${repo}+closed:>=${sinceDate}`;
+    const url = `https://api.github.com/search/issues?q=${q}&per_page=100&sort=updated&order=desc`;
+    const response = await fetch(url, { headers: this._headers(token) });
+    if (!response.ok) throw new Error(`GitHub API fout: ${response.status} ${response.statusText}`);
+    const data = await response.json();
+    return data.items || [];
+  },
+
+  async fetchReviewedMergedPRs(owner, repo, username, token, since) {
+    const sinceDate = since.toISOString().split('T')[0];
+    const q = `is:pr+is:merged+reviewed-by:${username}+repo:${owner}/${repo}+closed:>=${sinceDate}`;
+    const url = `https://api.github.com/search/issues?q=${q}&per_page=100&sort=updated&order=desc`;
+    const response = await fetch(url, { headers: this._headers(token) });
+    if (!response.ok) throw new Error(`GitHub API fout: ${response.status} ${response.statusText}`);
+    const data = await response.json();
+    return data.items || [];
   }
 };
