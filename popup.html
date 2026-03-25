@@ -10,6 +10,7 @@
   <div class="tabs">
     <button class="tab-button active" data-tab="timecalc">⏱️ Timecalc</button>
     <button class="tab-button" data-tab="githours">📊 Git Commits</button>
+    <button class="tab-button" data-tab="gitpullrequests">🔀 Pull Requests</button>
     <button class="tab-button" data-tab="jirahours">🎫 Jira Activity</button>
   </div>
 
@@ -161,6 +162,52 @@
     </div>
   </div>
 
+  <!-- Pull Requests Tab Content -->
+  <div id="gitpullrequests-tab" class="tab-content">
+    <div class="container">
+      <h1>Pull Requests</h1>
+
+      <div class="config-header" id="prConfigHeader">
+        <span>⚙️ Configuratie</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+
+      <div class="config-section" id="prConfigSection">
+        <label>
+          GitHub Personal Access Token
+          <input type="password" id="prGithubToken" placeholder="ghp_...">
+          <small>Zelfde token als bij Git Commits</small>
+        </label>
+
+        <label>
+          Repository Owner
+          <input type="text" id="prRepoOwner" value="edynamics">
+        </label>
+
+        <label>
+          Repository Name
+          <input type="text" id="prRepoName" value="Yoobi">
+        </label>
+
+        <label>
+          GitHub Gebruikersnaam
+          <input type="text" id="prGithubUsername" placeholder="jouw-github-username">
+          <small>Wordt automatisch ingevuld na het invoeren van een geldig token</small>
+        </label>
+      </div>
+
+      <button id="prRefreshBtn" class="button primary" style="margin-bottom: 16px;">🔄 Verversen</button>
+
+      <div id="prLoadingMsg" style="display: none;">
+        <p>⏳ Pull requests ophalen...</p>
+      </div>
+
+      <div id="prErrorMsg" class="error-msg" style="display: none;"></div>
+
+      <div id="prResults" style="display: none;"></div>
+    </div>
+  </div>
+
   <!-- Jira Hours Tab Content -->
   <div id="jirahours-tab" class="tab-content">
     <div class="container">
@@ -251,6 +298,7 @@
 
   <script src="popup.js"></script>
   <script type="module" src="git-hours/main.js"></script>
+  <script type="module" src="git-pullrequests/main.js"></script>
   <script type="module" src="jira-hours/main.js"></script>
 </body>
 </html>
