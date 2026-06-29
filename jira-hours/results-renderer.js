@@ -45,16 +45,25 @@ export const ResultsRenderer = {
         year: 'numeric' 
       });
 
+      const issueBreakdown = this.calculateIssueTimeBreakdown(data.activities, date);
+      const issueTimesHtml = Object.entries(issueBreakdown)
+        .sort((a, b) => b[1] - a[1])
+        .map(([issue, hours]) => `<span class="issue-time-badge">${issue}: ${String(hours).replace(/^0\./, '.')}h</span>`)
+        .join('');
+
       const dayCard = document.createElement('div');
       dayCard.className = 'day-card';
-      
+
       dayCard.innerHTML = `
         <div class="day-header">
           <div>
             <div class="day-name">${dayName}</div>
             <div class="day-date">${dateFormatted}</div>
           </div>
-          <div class="day-total">${data.logged.toFixed(2)}h gelogd</div>
+          <div class="day-header-right">
+            <div class="day-total">${data.logged.toFixed(2)}h gelogd</div>
+            ${issueTimesHtml ? `<div class="issue-times">${issueTimesHtml}</div>` : ''}
+          </div>
         </div>
         <div class="day-stats">
           <span>📋 ${data.issuesCount} issues</span>
@@ -147,6 +156,45 @@ export const ResultsRenderer = {
         </div>
       `;
     }).join('');
+  },
+
+  /**
+   * Bereken geschatte tijd per issue op basis van activiteitsgaten (zoals git-hours)
+   * Eerste activity: tijd vanaf 9:00 dag start; opvolgende: tijd vanaf vorige activity
+   * Trekt 30 min pauze af als een gap 12:00 overspant; rondt per issue af op halve uren
+   */
+  calculateIssueTimeBreakdown(activities, date) {
+    if (!activities || activities.length === 0) return {};
+
+    const sorted = [...activities].sort((a, b) =>
+      new Date(a.timestamp) - new Date(b.timestamp)
+    );
+
+    const startTime = new Date(`${date}T09:00:00`);
+    const lunchTime = new Date(`${date}T12:00:00`);
+    const issueTimes = {};
+    let prevTime = startTime;
+
+    for (const activity of sorted) {
+      const activityTime = new Date(activity.timestamp);
+      let diffMs = activityTime - prevTime;
+
+      // Trek 30 min pauze af als de gap 12:00 overspant
+      if (prevTime < lunchTime && activityTime > lunchTime) {
+        diffMs -= 30 * 60 * 1000;
+      }
+
+      const hours = diffMs > 0 ? diffMs / (1000 * 60 * 60) : 0;
+      issueTimes[activity.issue] = (issueTimes[activity.issue] || 0) + hours;
+      prevTime = activityTime;
+    }
+
+    // Afronden op halve uren
+    for (const issue of Object.keys(issueTimes)) {
+      issueTimes[issue] = Math.round(issueTimes[issue] * 2) / 2;
+    }
+
+    return issueTimes;
   },
 
   /**

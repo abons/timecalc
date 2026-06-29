@@ -348,6 +348,13 @@ input[type="time"]::-webkit-inner-spin-button {
   border-bottom: 1px solid #f0f0f0;
 }
 
+.day-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
 .day-total {
   background: #1976d2;
   color: white;
@@ -355,6 +362,22 @@ input[type="time"]::-webkit-inner-spin-button {
   border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
+}
+
+.issue-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.issue-time-badge {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .day-breakdown {
@@ -365,8 +388,10 @@ input[type="time"]::-webkit-inner-spin-button {
 }
 
 .breakdown-item {
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 2px 8px;
+  border-radius: 10px;
   font-size: 11px;
   font-weight: 500;
 }

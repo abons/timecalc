@@ -39,7 +39,7 @@ export const ResultsRenderer = {
     sortedCategories.forEach(([category, hours], index) => {
       if (summaryCards[index]) {
         summaryCards[index].querySelector('.card-label').textContent = category;
-        summaryCards[index].querySelector('.card-value').textContent = hours.toFixed(2);
+        summaryCards[index].querySelector('.card-value').textContent = String(Math.round(hours * 2) / 2).replace(/^0\./, '.');
         summaryCards[index].style.display = 'block';
       }
     });
@@ -80,13 +80,13 @@ export const ResultsRenderer = {
       dayCard.innerHTML = `
         <div class="day-header">
           <strong>${dayName} ${dateFormatted}</strong>
-          <span class="day-total">${dayTotal.toFixed(2)} uur</span>
+          <span class="day-total">${String(Math.round(dayTotal * 2) / 2).replace(/^0\./, '.')} uur</span>
         </div>
         ${dailyStartTimeSource[date] === 'default' ? 
           '<div class="day-note">⚠️ Starttijd 9:00 gebruikt (geen opgeslagen starttijd)</div>' : ''}
         <div class="day-breakdown">
           ${sortedDayCategories.map(([cat, hours]) => 
-            `<div class="breakdown-item">${this.escapeHtml(cat)}: ${hours.toFixed(2)}u</div>`
+            `<div class="breakdown-item">${this.escapeHtml(cat)}: ${String(Math.round(hours * 2) / 2).replace(/^0\./, '.')}u</div>`
           ).join('')}
         </div>
         <div class="commits-list">
