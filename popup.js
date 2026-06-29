@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   endInput.value = '17:00';
   pauseInput.value = '00:30';
 
-  // Focus op start (zoals mounted() this.$refs.start.focus())
-  startInput.focus();
+  // Focus op start: wacht tot het popup-window zelf focus krijgt van het OS
+  window.addEventListener('focus', () => startInput.focus({ preventScroll: true }), { once: true });
 
   function toMinutes(time) {
     if (!time) return 0;

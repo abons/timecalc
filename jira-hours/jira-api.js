@@ -152,7 +152,7 @@ export const JiraAPI = {
               }
             }
             
-            // Changelog (updates)
+            // Changelog (updates & emails)
             if (issue.changelog && issue.changelog.histories) {
               const userChanges = issue.changelog.histories.filter(history => {
                 if (!history.author || history.author.accountId !== accountId) {
@@ -163,15 +163,33 @@ export const JiraAPI = {
               });
               
               for (const change of userChanges) {
-                activities.push({
-                  type: 'update',
-                  issue: issue.key,
-                  summary: issue.fields.summary,
-                  timestamp: change.created,
-                  changes: change.items.map(item => 
-                    `${item.field}: ${item.fromString || '(empty)'} → ${item.toString || '(empty)'}`
-                  )
-                });
+                // Detecteer of dit een email-activiteit is
+                const isEmail = change.items.some(item => 
+                  item.field && item.field.toLowerCase().includes('email')
+                );
+                
+                if (isEmail) {
+                  const emailItem = change.items.find(item => 
+                    item.field && item.field.toLowerCase().includes('email')
+                  );
+                  activities.push({
+                    type: 'email',
+                    issue: issue.key,
+                    summary: issue.fields.summary,
+                    timestamp: change.created,
+                    recipient: emailItem ? (emailItem.toString || emailItem.fromString || '') : ''
+                  });
+                } else {
+                  activities.push({
+                    type: 'update',
+                    issue: issue.key,
+                    summary: issue.fields.summary,
+                    timestamp: change.created,
+                    changes: change.items.map(item => 
+                      `${item.field}: ${item.fromString || '(empty)'} → ${item.toString || '(empty)'}`
+                    )
+                  });
+                }
               }
             }
           }

@@ -17,6 +17,12 @@ export const ResultsRenderer = {
     if (createdElement && totals.created !== undefined) {
       createdElement.textContent = totals.created;
     }
+
+    // Voeg emails toe als het bestaat
+    const emailsElement = document.getElementById('jiraTotalEmails');
+    if (emailsElement && totals.emails !== undefined) {
+      emailsElement.textContent = totals.emails;
+    }
   },
 
   /**
@@ -55,6 +61,7 @@ export const ResultsRenderer = {
           <span>💬 ${data.comments} comments</span>
           <span>✏️ ${data.updates} updates</span>
           ${data.created ? `<span>✨ ${data.created} aangemaakt</span>` : ''}
+          ${data.emails ? `<span>📧 ${data.emails} emails</span>` : ''}
         </div>
         <div class="activity-list">
           ${this.renderActivities(data.activities, jiraUrl)}
@@ -106,6 +113,10 @@ export const ResultsRenderer = {
         case 'update':
           icon = '✏️';
           text = activity.changes.join(', ');
+          break;
+        case 'email':
+          icon = '📧';
+          text = `Email verstuurd${activity.recipient ? ` naar ${activity.recipient}` : ''}`;
           break;
         case 'created':
           icon = '✨';

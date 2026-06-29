@@ -14,9 +14,23 @@
     "webNavigation",
     "sidePanel"
   ],
+  "content_scripts": [
+    {
+      "matches": ["https://monitor.yoobi.nl/*"],
+      "js": ["monitor-yoobi/content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://monitor.yoobi.nl/*"],
+      "js": ["monitor-yoobi/page-world.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    }
+  ],
   "host_permissions": [
     "https://api.github.com/*",
-    "https://*.atlassian.net/*"
+    "https://*.atlassian.net/*",
+    "https://monitor.yoobi.nl/*"
   ],
   "side_panel": {
     "default_path": "popup.html"
