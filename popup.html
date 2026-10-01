@@ -307,6 +307,31 @@
     <div class="container">
       <h1>Tijd per Ticket</h1>
 
+      <div class="config-header" id="yoobiConfigHeader">
+        <span>⚙️ Yoobi configuratie</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+
+      <div class="config-section" id="yoobiConfigSection">
+        <label>
+          Employee ID
+          <input type="text" id="yoobiEmployeeId">
+          <small><code>employeeid</code> uit de saveTimesheetDay request</small>
+        </label>
+
+        <label>
+          Activiteit per Jira project
+          <textarea id="yoobiActivities" rows="3" placeholder="SPR=activityid"></textarea>
+          <small>Per regel <code>JIRAPROJECT=activityid</code>; <code>*=...</code> voor de rest. Tickets zonder activiteit worden overgeslagen. Let op: de fetch vervangt alle uren op die activiteit voor die dag.</small>
+        </label>
+
+        <label>
+          Specificatie veld ID
+          <input type="text" id="yoobiSpecificationId">
+          <small>GUID in <code>specification-…0</code>; hierin komt het ticketnummer</small>
+        </label>
+      </div>
+
       <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
         <label style="flex: 1; margin-bottom: 0;">
           Periode
@@ -334,7 +359,7 @@
 
       <div class="info-note" style="background: #e8f4f8; border-left: 4px solid #0078d4; padding: 12px; margin: 16px 0; border-radius: 4px;">
         <strong>ℹ️ Over tijdsberekening:</strong>
-        <p style="margin: 8px 0 0 0; font-size: 0.9em; line-height: 1.5;">Commits en Jira activity vormen samen één tijdlijn per dag. Elk event krijgt de tijd sinds het vorige event (eerste event: vanaf de eerste interactie in Timecalc, anders 9:00). Een gap over 12:00 telt 30 min pauze minder. Commits worden aan een ticket gekoppeld via het ticketnummer in de message of branch. Configuratie komt uit de tabs Git Commits en Jira Activity.</p>
+        <p style="margin: 8px 0 0 0; font-size: 0.9em; line-height: 1.5;">Commits en Jira activity vormen samen één tijdlijn per dag. Elk event krijgt de tijd sinds het vorige event (eerste event: vanaf de eerste interactie in Timecalc, anders 9:00). Een gap over 12:00 telt 30 min pauze minder. Commits worden aan een ticket gekoppeld via het ticketnummer in de message of branch. Configuratie komt uit de tabs Git Commits en Jira Activity. Met 📤 Boek registreer je de uren direct in Yoobi via een open, ingelogde Yoobi tab; met 📋 Yoobi kopieer je dezelfde saveTimesheetDay fetch om in de DevTools console van die tab te plakken.</p>
       </div>
 
       <div id="combinedWarningMsg" class="day-note" style="display: none;"></div>
@@ -344,7 +369,12 @@
         <div class="combined-totals">
           <span>Totaal: <strong id="combinedTotal">0</strong> uur</span>
           <span>Dagen: <strong id="combinedDays">0</strong></span>
+          <span class="yoobi-buttons">
+            <button id="yoobiCopyAllBtn" class="yoobi-copy-btn" title="Kopieer Yoobi fetches voor alle dagen">📋 Yoobi alles</button>
+            <button id="yoobiBookAllBtn" class="yoobi-copy-btn" title="Boek alle dagen direct in de open Yoobi tab">📤 Boek alles</button>
+          </span>
         </div>
+        <div class="yoobi-panel" id="yoobiAllPanel"></div>
 
         <div id="combinedDailyBreakdown"></div>
       </div>

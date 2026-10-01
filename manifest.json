@@ -11,6 +11,7 @@
   },
   "permissions": [
     "storage",
+    "scripting",
     "webNavigation",
     "sidePanel"
   ],
@@ -30,7 +31,8 @@
   "host_permissions": [
     "https://api.github.com/*",
     "https://*.atlassian.net/*",
-    "https://monitor.yoobi.nl/*"
+    "https://monitor.yoobi.nl/*",
+    "https://e-dynamicsbv.yoobi.nl/*"
   ],
   "side_panel": {
     "default_path": "popup.html"

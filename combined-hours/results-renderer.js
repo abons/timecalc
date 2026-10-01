@@ -45,8 +45,16 @@ export const CombinedResultsRenderer = {
             <div class="day-name">${dayName}</div>
             <div class="day-date">${dateFormatted}</div>
           </div>
-          <div class="day-total">${this.formatHours(day.total)} uur</div>
+          <div class="day-header-right">
+            <div class="day-total">${this.formatHours(day.total)} uur</div>
+            ${day.total > 0 ? `
+              <div class="yoobi-buttons">
+                <button class="yoobi-copy-btn" data-yoobi-date="${date}" title="Kopieer Yoobi fetch voor deze dag">📋 Yoobi</button>
+                <button class="yoobi-copy-btn" data-yoobi-book="${date}" title="Boek deze dag direct in de open Yoobi tab">📤 Boek</button>
+              </div>` : ''}
+          </div>
         </div>
+        <div class="yoobi-panel" data-yoobi-panel="${date}"></div>
         ${day.startTimeSource === 'default'
           ? '<div class="day-note">⚠️ Starttijd 9:00 gebruikt (geen opgeslagen starttijd)</div>' : ''}
         ${day.tickets.map(t => this.renderTicket(t, baseUrl)).join('')}
