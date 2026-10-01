@@ -800,3 +800,80 @@ input[type="time"]::-webkit-inner-spin-button {
   background: #fce4ec;
   color: #c62828;
 }
+
+/* Combined Hours Specific Styles */
+.combined-totals {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0 12px;
+  font-size: 13px;
+  color: #333;
+}
+
+.combined-ticket {
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.combined-ticket:last-child {
+  border-bottom: none;
+}
+
+.combined-ticket summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.combined-ticket summary::-webkit-details-marker {
+  display: none;
+}
+
+.combined-ticket summary::before {
+  content: '▶';
+  font-size: 9px;
+  color: #999;
+  transition: transform 0.2s;
+}
+
+.combined-ticket[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.combined-ticket-key {
+  font-weight: 600;
+  color: #1976d2;
+  min-width: 90px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.combined-ticket-key .issue-link {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.combined-ticket-key .issue-link:hover {
+  text-decoration: underline;
+}
+
+.combined-ticket-summary {
+  flex: 1;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.combined-ticket-sources {
+  color: #999;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.combined-ticket .activity-list {
+  margin: 0 0 6px 17px;
+}

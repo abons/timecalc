@@ -35,7 +35,7 @@ export const ResultsRenderer = {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4);
 
-    const summaryCards = document.querySelectorAll('.summary-card');
+    const summaryCards = document.querySelectorAll('#resultsSection .summary-card');
     sortedCategories.forEach(([category, hours], index) => {
       if (summaryCards[index]) {
         summaryCards[index].querySelector('.card-label').textContent = category;

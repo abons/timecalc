@@ -12,6 +12,7 @@
     <button class="tab-button" data-tab="githours">📊 Git Commits</button>
     <button class="tab-button" data-tab="gitpullrequests">🔀 Pull Requests</button>
     <button class="tab-button" data-tab="jirahours">🎫 Jira Activity</button>
+    <button class="tab-button" data-tab="combined">🧩 Per Ticket</button>
   </div>
 
   <!-- Timecalc Tab Content -->
@@ -301,9 +302,59 @@
     </div>
   </div>
 
+  <!-- Combined Hours Tab Content -->
+  <div id="combined-tab" class="tab-content">
+    <div class="container">
+      <h1>Tijd per Ticket</h1>
+
+      <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+        <label style="flex: 1; margin-bottom: 0;">
+          Periode
+          <select id="combinedPeriodSelect" style="margin-top: 4px; padding: 8px; height: 36px;">
+            <!-- Options worden dynamisch gegenereerd -->
+          </select>
+        </label>
+        <button id="combinedAnalyzeBtn" class="button primary" style="margin-top: 0; width: auto; padding: 8px 16px; height: 36px; display: flex; align-items: center; gap: 4px;">🔄 Verversen</button>
+      </div>
+
+      <div id="combinedCustomPeriod" style="display: none;">
+        <label>
+          Van
+          <input type="date" id="combinedDateFrom">
+        </label>
+        <label>
+          Tot
+          <input type="date" id="combinedDateTo">
+        </label>
+      </div>
+
+      <div id="combinedLoadingMsg" style="display: none;">
+        <p>⏳ Commits en Jira activity ophalen en samenvoegen...</p>
+      </div>
+
+      <div class="info-note" style="background: #e8f4f8; border-left: 4px solid #0078d4; padding: 12px; margin: 16px 0; border-radius: 4px;">
+        <strong>ℹ️ Over tijdsberekening:</strong>
+        <p style="margin: 8px 0 0 0; font-size: 0.9em; line-height: 1.5;">Commits en Jira activity vormen samen één tijdlijn per dag. Elk event krijgt de tijd sinds het vorige event (eerste event: vanaf de eerste interactie in Timecalc, anders 9:00). Een gap over 12:00 telt 30 min pauze minder. Commits worden aan een ticket gekoppeld via het ticketnummer in de message of branch. Configuratie komt uit de tabs Git Commits en Jira Activity.</p>
+      </div>
+
+      <div id="combinedWarningMsg" class="day-note" style="display: none;"></div>
+      <div id="combinedErrorMsg" class="error-msg" style="display: none;"></div>
+
+      <div id="combinedResultsSection" style="display: none;">
+        <div class="combined-totals">
+          <span>Totaal: <strong id="combinedTotal">0</strong> uur</span>
+          <span>Dagen: <strong id="combinedDays">0</strong></span>
+        </div>
+
+        <div id="combinedDailyBreakdown"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="popup.js"></script>
   <script type="module" src="git-hours/main.js"></script>
   <script type="module" src="git-pullrequests/main.js"></script>
   <script type="module" src="jira-hours/main.js"></script>
+  <script type="module" src="combined-hours/main.js"></script>
 </body>
 </html>
