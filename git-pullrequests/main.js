@@ -89,12 +89,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error('Vul alle configuratievelden in (token, owner, repo en gebruikersnaam).');
       }
 
-      // Haal reviewer-PRs en assignee-PRs parallel op
-      const [reviewerRaw, reviewedOpenRaw, allAssigneePRs] = await Promise.all([
+      // Haal reviewer-PRs, assignee-PRs en auteur-PRs parallel op
+      const [reviewerRaw, reviewedOpenRaw, assigneeRaw, authorRaw] = await Promise.all([
         PullRequestAPI.fetchReviewRequestedPRs(owner, repo, username, token),
         PullRequestAPI.fetchReviewedOpenPRs(owner, repo, username, token),
-        PullRequestAPI.fetchAssigneePRs(owner, repo, username, token)
+        PullRequestAPI.fetchAssigneePRs(owner, repo, username, token),
+        PullRequestAPI.fetchAuthorPRs(owner, repo, username, token)
       ]);
+
+      // Mijn PRs = assignee + auteur (dedup)
+      const assigneeNumbers = new Set(assigneeRaw.map(pr => pr.number));
+      const allAssigneePRs = [...assigneeRaw, ...authorRaw.filter(pr => !assigneeNumbers.has(pr.number))];
 
       // Filter reviewer-PRs: sla over als de gebruiker al een CHANGES_REQUESTED review heeft gedaan
       // (bal ligt dan bij de assignee, geen actie nodig van de reviewer)
@@ -186,17 +191,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadingMsg.style.display = 'none';
       resultsContainer.style.display = 'block';
 
-      // Gesloten PRs (afgelopen maand, auteur = ik)
+      // Gesloten PRs (afgelopen maand, auteur of assignee = ik)
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      const [closedPRs, reviewedMergedPRs] = await Promise.all([
+      const [closedAuthorPRs, closedAssigneePRs, reviewedMergedPRs] = await Promise.all([
         PullRequestAPI.fetchClosedAuthorPRs(owner, repo, username, token, oneMonthAgo),
+        PullRequestAPI.fetchClosedAssigneePRs(owner, repo, username, token, oneMonthAgo),
         PullRequestAPI.fetchReviewedMergedPRs(owner, repo, username, token, oneWeekAgo)
       ]);
+
+      // Mijn gesloten PRs = auteur + assignee (dedup)
+      const closedAuthorNumbers = new Set(closedAuthorPRs.map(pr => pr.number));
+      const closedPRs = [...closedAuthorPRs, ...closedAssigneePRs.filter(pr => !closedAuthorNumbers.has(pr.number))]
+        .sort((a, b) => (b.closed_at || '').localeCompare(a.closed_at || ''));
 
       // Groepeer per dag (closed_at)
       const closedByDay = {};

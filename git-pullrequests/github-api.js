@@ -44,6 +44,15 @@ export const PullRequestAPI = {
     return data.items || [];
   },
 
+  async fetchAuthorPRs(owner, repo, username, token) {
+    const q = `is:pr+is:open+author:${username}+repo:${owner}/${repo}`;
+    const url = `https://api.github.com/search/issues?q=${q}&per_page=50`;
+    const response = await fetch(url, { headers: this._headers(token) });
+    if (!response.ok) throw new Error(`GitHub API fout: ${response.status} ${response.statusText}`);
+    const data = await response.json();
+    return data.items || [];
+  },
+
   async fetchPRReviews(owner, repo, prNumber, token) {
     const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews`;
     const response = await fetch(url, { headers: this._headers(token) });
@@ -62,6 +71,16 @@ export const PullRequestAPI = {
   async fetchClosedAuthorPRs(owner, repo, username, token, since) {
     const sinceDate = since.toISOString().split('T')[0];
     const q = `is:pr+is:closed+author:${username}+repo:${owner}/${repo}+closed:>=${sinceDate}`;
+    const url = `https://api.github.com/search/issues?q=${q}&per_page=100&sort=updated&order=desc`;
+    const response = await fetch(url, { headers: this._headers(token) });
+    if (!response.ok) throw new Error(`GitHub API fout: ${response.status} ${response.statusText}`);
+    const data = await response.json();
+    return data.items || [];
+  },
+
+  async fetchClosedAssigneePRs(owner, repo, username, token, since) {
+    const sinceDate = since.toISOString().split('T')[0];
+    const q = `is:pr+is:closed+assignee:${username}+repo:${owner}/${repo}+closed:>=${sinceDate}`;
     const url = `https://api.github.com/search/issues?q=${q}&per_page=100&sort=updated&order=desc`;
     const response = await fetch(url, { headers: this._headers(token) });
     if (!response.ok) throw new Error(`GitHub API fout: ${response.status} ${response.statusText}`);

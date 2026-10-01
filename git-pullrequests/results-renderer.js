@@ -23,7 +23,7 @@ export const PRResultsRenderer = {
 
     // --- Overzichtssecties (ingeklapt) ---
     container.appendChild(this._renderCollapsibleSection(
-      `Mijn PRs als assignee`,
+      `Mijn PRs als assignee of auteur`,
       allAssigneePRs,
       pr => this._statusBadge(pr._status, 'assignee'),
       pr => pr._reviewerStatus
@@ -257,6 +257,11 @@ export const PRResultsRenderer = {
           prNumber.className = 'pr-number';
           prNumber.textContent = `#${pr.number}`;
           meta.appendChild(prNumber);
+
+          const author = document.createElement('span');
+          author.className = 'pr-author';
+          author.textContent = `door ${pr.user.login}`;
+          meta.appendChild(author);
 
           const age = document.createElement('span');
           age.className = 'pr-age';
