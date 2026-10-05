@@ -332,6 +332,12 @@
         </label>
       </div>
 
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+        <span id="claudeStatus" style="flex: 1; font-size: 12px;"></span>
+        <button id="claudeLinkBtn" class="yoobi-copy-btn" title="Kopieert het pad naar het klembord: plak het in de adresbalk van de mapkiezer">🤖 Koppel Claude sessies</button>
+        <button id="claudeUnlinkBtn" class="yoobi-copy-btn" style="display: none;">Ontkoppel</button>
+      </div>
+
       <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
         <label style="flex: 1; margin-bottom: 0;">
           Periode
@@ -369,6 +375,12 @@
         <div class="combined-totals">
           <span>Totaal: <strong id="combinedTotal">0</strong> uur</span>
           <span>Dagen: <strong id="combinedDays">0</strong></span>
+          <label style="margin: 0; display: flex; align-items: center; gap: 4px;" title="Geschaald: zelfde verhoudingen per ticket, maar het dagtotaal is gelijk aan je Timecalc werktijd (eerste tot laatste interactie, min lunch)">Uren:
+            <select id="combinedHoursMode" style="padding: 2px 4px; font-size: 12px;">
+              <option value="computed">Berekend</option>
+              <option value="scaled">Geschaald naar Timecalc</option>
+            </select>
+          </label>
           <span class="yoobi-buttons">
             <button id="yoobiCopyAllBtn" class="yoobi-copy-btn" title="Kopieer Yoobi fetches voor alle dagen">📋 Yoobi alles</button>
             <button id="yoobiBookAllBtn" class="yoobi-copy-btn" title="Boek alle dagen direct in de open Yoobi tab">📤 Boek alles</button>

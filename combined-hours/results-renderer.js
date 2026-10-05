@@ -15,7 +15,7 @@ export const CombinedResultsRenderer = {
   },
 
   formatHours(hours) {
-    return String(hours).replace(/^0\./, '.');
+    return String(Math.round(hours * 100) / 100).replace(/^0\./, '.');
   },
 
   /**
@@ -55,12 +55,46 @@ export const CombinedResultsRenderer = {
           </div>
         </div>
         <div class="yoobi-panel" data-yoobi-panel="${date}"></div>
+        ${this.renderDayInfo(day)}
         ${day.startTimeSource === 'default'
           ? '<div class="day-note">⚠️ Starttijd 9:00 gebruikt (geen opgeslagen starttijd)</div>' : ''}
         ${day.tickets.map(t => this.renderTicket(t, baseUrl)).join('')}
       `;
       container.appendChild(dayCard);
     }
+  },
+
+  /**
+   * Uren als tijdsduur, bv. 2.6667 -> 2:40
+   */
+  formatDuration(hours) {
+    const minutes = Math.round(hours * 60);
+    return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, '0')}`;
+  },
+
+  formatClock(ms) {
+    return new Date(ms).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  },
+
+  /**
+   * Timecalc werktijd naast de berekende uren, en werk buiten die werktijd
+   */
+  renderDayInfo(day) {
+    const lines = [];
+    if (day.timecalc) {
+      const shown = day.scaled ? 'geschaald getoond' : 'berekend getoond';
+      lines.push(`⏱️ Timecalc werktijd ${day.timecalc.first}–${day.timecalc.last} = ${this.formatDuration(day.timecalc.hours)} (excl. lunch) · berekend ${this.formatDuration(day.computedTotal)}${day.scaledTotal !== null ? ` · geschaald ${this.formatDuration(day.scaledTotal)}` : ''} · ${shown}`);
+    }
+    const { before, after } = day.outside || {};
+    if (before) {
+      const range = before.from ? `${this.formatClock(before.from)}–${before.until}` : `voor ${before.until}`;
+      lines.push(`🌅 Werk vóór Timecalc starttijd: ${range}${before.hours > 0 ? ` · ${this.formatDuration(before.hours)} Claude` : ''}${before.points ? ` · ${before.points} commit/Jira` : ''}`);
+    }
+    if (after) {
+      const range = after.to ? `${after.since}–${this.formatClock(after.to)}` : `na ${after.since}`;
+      lines.push(`🌙 Werk na Timecalc eindtijd: ${range}${after.hours > 0 ? ` · ${this.formatDuration(after.hours)} Claude` : ''}${after.points ? ` · ${after.points} commit/Jira` : ''}`);
+    }
+    return lines.map(line => `<div class="day-note">${this.escapeHtml(line)}</div>`).join('');
   },
 
   /**
@@ -74,6 +108,7 @@ export const CombinedResultsRenderer = {
     const sources = [
       ticket.commits ? `🔨 ${ticket.commits}` : '',
       ticket.jiraActivities ? `🎫 ${ticket.jiraActivities}` : '',
+      ticket.claudeMinutes >= 1 ? `<span title="Som van alle Claude sessies op dit ticket. Parallelle sessies tellen hier dubbel; de uren rechts zijn de eerlijk verdeelde klokuren.">🤖 ${this.formatHours(Math.round(ticket.claudeMinutes / 6) / 10)}u sessies</span>` : '',
       ticket.loggedHours ? `⏱️ ${this.formatHours(Math.round(ticket.loggedHours * 100) / 100)}u gelogd` : ''
     ].filter(Boolean).join(' · ');
 
@@ -85,7 +120,7 @@ export const CombinedResultsRenderer = {
           <span class="combined-ticket-key">${label}</span>
           <span class="combined-ticket-summary" title="${this.escapeHtml(ticket.summary)}">${this.escapeHtml(ticket.summary)}</span>
           <span class="combined-ticket-sources">${sources}</span>
-          <span class="issue-time-badge">${this.formatHours(ticket.hours)}u</span>
+          <span class="issue-time-badge" title="${ticket.scaledHours !== undefined ? `Berekend ${this.formatHours(ticket.computedHours)}u · geschaald ${this.formatHours(ticket.scaledHours)}u` : ''}">${this.formatHours(ticket.hours)}u</span>
         </summary>
         <div class="activity-list">
           ${events.map(e => this.renderEvent(e)).join('')}
@@ -109,6 +144,17 @@ export const CombinedResultsRenderer = {
             <a href="${event.url}" target="_blank" class="commit-link" title="Open in GitHub">${this.escapeHtml(event.message)}</a>
           </span>
           ${event.branch ? `<span class="commit-branch">🌿 ${this.escapeHtml(event.branch)}</span>` : ''}
+        </div>
+      `;
+    }
+
+    if (event.source === 'claude') {
+      const end = event.endTime.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="activity-item">
+          <span class="activity-time">${time}</span>
+          <span class="activity-icon">🤖</span>
+          <span class="activity-text">${event.title ? this.escapeHtml(event.title) : 'Claude sessie'} · tot ${end} (${Math.round(event.minutes)} min)</span>
         </div>
       `;
     }
