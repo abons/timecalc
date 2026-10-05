@@ -13,6 +13,7 @@ import { CombinedResultsRenderer } from './results-renderer.js';
 import { StorageManager as YoobiStorage } from './storage.js';
 import { YoobiFetch } from './yoobi-fetch.js';
 import { YoobiBooker } from './yoobi-booker.js';
+import { ClaudeSessions } from './claude-sessions.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // DOM elementen
@@ -27,11 +28,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorMsg = document.getElementById('combinedErrorMsg');
   const resultsSection = document.getElementById('combinedResultsSection');
   const dailyBreakdown = document.getElementById('combinedDailyBreakdown');
+  const hoursModeSelect = document.getElementById('combinedHoursMode');
   const copyAllBtn = document.getElementById('yoobiCopyAllBtn');
   const bookAllBtn = document.getElementById('yoobiBookAllBtn');
   const allPanel = document.getElementById('yoobiAllPanel');
   const configHeader = document.getElementById('yoobiConfigHeader');
   const configSection = document.getElementById('yoobiConfigSection');
+  const claudeStatus = document.getElementById('claudeStatus');
+  const claudeLinkBtn = document.getElementById('claudeLinkBtn');
+  const claudeUnlinkBtn = document.getElementById('claudeUnlinkBtn');
   const yoobiInputs = ['yoobiEmployeeId', 'yoobiActivities', 'yoobiSpecificationId']
     .map(id => document.getElementById(id));
 
@@ -58,8 +63,93 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  // Claude sessies: map .claude/projects, handle blijft bewaard (toegang moet per sessie bevestigd worden)
+  // Handle onthouden zodat de klik direct requestPermission kan aanroepen (geen await ervoor: user activation)
+  let claudeHandle = null;
+
+  // Alleen deze fouten betekenen dat de opgeslagen map weg is; andere (o.a. SecurityError door een
+  // verlopen klik) zijn tijdelijk en mogen de koppeling niet wissen
+  const isInvalidHandleError = (error) => error && (error.name === 'NotFoundError' || error.name === 'InvalidStateError');
+  const dropClaudeHandle = async () => {
+    claudeHandle = null;
+    try {
+      await ClaudeSessions.clearHandle();
+    } catch (error) {
+      console.warn('Claude handle wissen mislukt:', error);
+    }
+  };
+
+  const refreshClaudeStatus = async () => {
+    let handle = claudeHandle = await ClaudeSessions.getHandle();
+    let granted = false;
+    try {
+      granted = handle ? await ClaudeSessions.hasPermission(handle) : false;
+    } catch (error) {
+      console.warn('Claude handle onbruikbaar:', error);
+      if (isInvalidHandleError(error)) {
+        await dropClaudeHandle();
+        handle = null;
+      }
+    }
+    claudeStatus.textContent = !handle
+      ? 'Claude sessies niet gekoppeld'
+      : granted ? '🤖 Claude sessies gekoppeld' : '🤖 Claude sessies: toegang opnieuw bevestigen';
+    claudeLinkBtn.style.display = granted ? 'none' : '';
+    claudeLinkBtn.textContent = handle ? '🤖 Geef toegang' : '🤖 Koppel Claude sessies';
+    claudeUnlinkBtn.style.display = handle ? '' : 'none';
+  };
+
+  claudeLinkBtn.addEventListener('click', async () => {
+    try {
+      if (claudeHandle) await ClaudeSessions.requestPermission(claudeHandle);
+      else await ClaudeSessions.pickDirectory();
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('❌ Claude koppelen mislukt:', error);
+        // Ongeldige handle weghalen zodat een volgende klik de mapkiezer opent
+        if (isInvalidHandleError(error)) await dropClaudeHandle();
+      }
+    }
+    await refreshClaudeStatus();
+    if (loaded) performAnalysis();
+  });
+
+  claudeUnlinkBtn.addEventListener('click', async () => {
+    await ClaudeSessions.clearHandle();
+    await refreshClaudeStatus();
+    if (loaded) performAnalysis();
+  });
+
+  refreshClaudeStatus();
+
   // Kopieer Yoobi fetch(es) naar klembord
+  // rawResult: analyse met beide uren per ticket; lastResult: wat getoond en geboekt wordt (gekozen modus)
+  let rawResult = null;
+  let jiraBaseUrl = '';
   let lastResult = null;
+
+  // Geschaalde uren gelden alleen voor dagen met een Timecalc-werktijd; andere dagen houden de berekende uren
+  const viewOf = (result, mode) => {
+    const daily = {};
+    let total = 0;
+    for (const [date, day] of Object.entries(result.daily)) {
+      const scaled = mode === 'scaled' && day.scaledTotal !== null;
+      const tickets = day.tickets
+        .map(t => ({ ...t, hours: scaled ? t.scaledHours : t.hours, computedHours: t.hours }))
+        .sort((a, b) => b.hours - a.hours);
+      daily[date] = { ...day, tickets, computedTotal: day.total, total: scaled ? day.scaledTotal : day.total, scaled };
+      total += daily[date].total;
+    }
+    return { daily, total };
+  };
+
+  const showResult = () => {
+    lastResult = viewOf(rawResult, hoursModeSelect.value);
+    allPanel.innerHTML = '';
+    CombinedResultsRenderer.render(lastResult, jiraBaseUrl);
+  };
+
+  hoursModeSelect.addEventListener('change', () => { if (rawResult) showResult(); });
   const copyToClipboard = async (button, text) => {
     const original = button.textContent;
     try {
@@ -242,13 +332,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       const activities = activitiesResult.status === 'fulfilled' ? activitiesResult.value : [];
 
       const events = TimelineAnalyzer.buildEvents(commits, activities, git.repoOwner, git.repoName);
-      const firstInteractions = await GitStorage.getFirstInteractions();
-      const result = TimelineAnalyzer.analyze(events, firstInteractions, since, until);
+
+      // Claude sessies zijn optioneel: ontbrekende koppeling of toegang is geen fout
+      let claudeSegments = [];
+      const storedHandle = await ClaudeSessions.getHandle();
+      if (storedHandle) {
+        try {
+          if (!(await ClaudeSessions.hasPermission(storedHandle))) {
+            throw new Error('toegang tot de map moet opnieuw bevestigd worden (knop bovenaan)');
+          }
+          const sessions = await ClaudeSessions.readSessions(storedHandle, new Date(`${since}T00:00:00`).getTime());
+          const matcher = TimelineAnalyzer.buildTicketMatcher(activities);
+          claudeSegments = ClaudeSessions.buildSegments(sessions, texts => TimelineAnalyzer.extractTicket(texts, matcher));
+        } catch (error) {
+          warnings.push(`Claude sessies niet meegenomen: ${error.message}`);
+        }
+        refreshClaudeStatus();
+      }
+      const [firstInteractions, lastInteractions] = await Promise.all([GitStorage.getFirstInteractions(), GitStorage.getLastInteractions()]);
+      const result = TimelineAnalyzer.analyze(events, firstInteractions, since, until, claudeSegments, lastInteractions);
       if (requestId !== currentRequest) return;
 
-      lastResult = result;
-      allPanel.innerHTML = '';
-      CombinedResultsRenderer.render(result, jira.jiraUrl);
+      rawResult = result;
+      jiraBaseUrl = jira.jiraUrl;
+      showResult();
 
       if (warnings.length > 0) {
         warningMsg.textContent = `⚠️ ${warnings.join(' | ')}`;

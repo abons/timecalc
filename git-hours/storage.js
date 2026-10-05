@@ -31,6 +31,23 @@ export const StorageManager = {
   },
 
   /**
+   * Haal laatste interactie tijden op uit storage
+   */
+  async getLastInteractions() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(null, (items) => {
+        const interactions = {};
+        Object.keys(items).forEach(key => {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(key) && items[key].lastInteraction) {
+            interactions[key] = items[key].lastInteraction;
+          }
+        });
+        resolve(interactions);
+      });
+    });
+  },
+
+  /**
    * Haal eerste interactie tijden op uit storage
    */
   async getFirstInteractions() {
