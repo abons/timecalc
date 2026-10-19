@@ -171,9 +171,10 @@ export const TimelineAnalyzer = {
   /**
    * Verdeel de tijd per dag over tickets.
    * Git/Jira events claimen de tijd sinds het vorige event (eerste event: vanaf eerste interactie
-   * of 9:00; de lunchpauze 12:00-12:30 gaat eraf als de gap erover heen loopt). Claude sessie-blokken
-   * claimen hun eigen tijdvak. Tijd die door meerdere tickets geclaimd wordt (parallelle sessies)
-   * wordt gelijk verdeeld, zodat een dag nooit meer uren krijgt dan er klokuren zijn.
+   * of 9:00). Claude sessie-blokken claimen hun eigen tijdvak. De lunchpauze 12:00-12:30 en tijd buiten
+   * de Timecalc werktijd (eerste tot laatste interactie, voor zover bekend) tellen niet mee. Tijd die
+   * door meerdere tickets geclaimd wordt (parallelle sessies) wordt gelijk verdeeld, zodat een dag nooit
+   * meer uren krijgt dan er klokuren zijn.
    * Rondt af op halve uren (zie roundToHalfHours). Bij een bekende Timecalc-werktijd wordt ook een
    * voorstel berekend (scaledHours) waarbij de ticketverhoudingen gelijk blijven maar het dagtotaal
    * gelijk is aan die werktijd.
@@ -224,6 +225,13 @@ export const TimelineAnalyzer = {
       const tickets = {};
       const claims = [];
       const claudeTitles = {};
+      // Alleen tijd binnen je Timecalc werktijd telt; werk daarbuiten (ook remote) staat in `outside`
+      const clock = (time) => {
+        const [h, m] = time.split(':').map(Number);
+        return new Date(`${date}T00:00:00`).setHours(h, m, 0, 0);
+      };
+      const workStart = firstInteractions[date] ? clock(firstInteractions[date]) : -Infinity;
+      const workEnd = lastInteractions[date] ? clock(lastInteractions[date]) : Infinity;
 
       for (const event of dayEvents) {
         const key = event.ticket || `branch:${event.fallbackKey}`;
@@ -270,18 +278,19 @@ export const TimelineAnalyzer = {
       }
 
       // Sweep over alle grenzen; elk stuk tijd gaat gelijk naar de tickets die het claimen.
-      // Gaps (git/jira) tellen niet mee tijdens de lunchpauze, Claude sessies wel (echte activiteit).
-      const bounds = [...new Set([...claims.flatMap(c => [c.start, c.end]), lunchStart, lunchEnd])]
+      // De lunchpauze en tijd buiten de Timecalc werktijd tellen niet mee, ook niet voor Claude sessies.
+      const bounds = [...new Set([...claims.flatMap(c => [c.start, c.end]), lunchStart, lunchEnd, workStart, workEnd])]
+        .filter(Number.isFinite)
         .sort((a, b) => a - b);
       for (let i = 0; i < bounds.length - 1; i++) {
         const [from, to] = [bounds[i], bounds[i + 1]];
-        const inLunch = from >= lunchStart && to <= lunchEnd;
+        if (from >= lunchStart && to <= lunchEnd) continue;
+        if (from < workStart || to > workEnd) continue;
         // Claude-activiteit is bewezen, een git/Jira-gap is een aanname: bij overlap winnen de Claude-tickets
         const claudeKeys = new Set();
         const gapKeys = new Set();
         for (const claim of claims) {
           if (claim.start > from || claim.end < to) continue;
-          if (claim.isGap && inLunch) continue;
           (claim.isGap ? gapKeys : claudeKeys).add(claim.key);
         }
         const keys = claudeKeys.size > 0 ? claudeKeys : gapKeys;

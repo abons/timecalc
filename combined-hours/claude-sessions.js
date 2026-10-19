@@ -14,6 +14,10 @@ const MENTION_PREFIX_CHARS = 40;
 // Pauze langer dan dit telt als afwezig: het blok stopt bij het laatste bericht voor de pauze
 const IDLE_GAP_MS = 30 * 60 * 1000;
 
+// Claude's eigen werk (antwoorden, tool calls, agents, task notifications) telt alleen zo lang na jouw
+// laatste prompt of antwoord mee: een lange autonome run of een agent die 's nachts doorloopt is geen werktijd
+const CLAUDE_TAIL_MS = 15 * 60 * 1000;
+
 const NOISE_TAGS = /<(system-reminder|task-notification|browser_instruction|local-command-[a-z]+|ide_[a-z_]+|pasted_content)[^>]*>[\s\S]*?<\/\1>/g;
 
 const openDb = () => new Promise((resolve, reject) => {
@@ -139,9 +143,13 @@ export const ClaudeSessions = {
       const time = Date.parse(record.timestamp);
       if (isNaN(time)) continue;
       const isPrompt = isUser && !record.isSidechain && !record.isMeta;
+      const text = isPrompt ? this.promptText(record.message) : '';
       records.push({
         time,
-        text: isPrompt ? this.promptText(record.message) : '',
+        text,
+        // Jij was aanwezig: een getypte prompt of een antwoord op een AskUserQuestion vraag
+        // (tool results en task notifications zijn ook "user" records, maar die komen van Claude zelf)
+        present: Boolean(text.trim()) || (isPrompt && Boolean(record.toolUseResult && record.toolUseResult.answers)),
         context: isUser ? [record.gitBranch, record.cwd] : null
       });
     }
@@ -164,13 +172,14 @@ export const ClaudeSessions = {
       let fallbackKey = null;
       let lastContext = '';
       let open = null;
+      let lastPresent = null;
 
       const flush = () => {
         if (open && open.end > open.start) segments.push(open);
         open = null;
       };
 
-      session.records.forEach((record, index) => {
+      session.records.forEach(record => {
         if (record.context) {
           const key = record.context.join('|');
           if (key !== lastContext) {
@@ -195,8 +204,11 @@ export const ClaudeSessions = {
           ticketFromPrompt = true;
         }
 
-        const previous = session.records[index - 1];
-        const idle = previous && record.time - previous.time > IDLE_GAP_MS;
+        // Claude dat zonder jou doorwerkt verlengt het blok niet
+        if (record.present) lastPresent = record.time;
+        else if (lastPresent === null || record.time - lastPresent > CLAUDE_TAIL_MS) return;
+
+        const idle = open && record.time - open.end > IDLE_GAP_MS;
         if (idle) flush();
 
         // Zonder ticket splitst ook een andere werkmap het blok
